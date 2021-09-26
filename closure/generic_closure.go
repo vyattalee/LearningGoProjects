@@ -40,6 +40,8 @@ func main() {
 		{Id: 6, Name: "Fred Leonado"},
 		{Id: 7, Name: "Jenny"},
 		{Id: 8, Name: "Fred"},
+		{Id: 9, Name: "red"},
+		{Id: 10, Name: "FredMan"},
 	}
 	var allFredEmps []Employee
 	NameFilter(len(employees), "Fred", func(i int) string {
@@ -50,6 +52,7 @@ func main() {
 	fmt.Println("All Employees which contain name of 'Fred':", allFredEmps)
 }
 
+//the following lines are duplicate code, should use closure feature above to achieve the generic
 func FilterPerson(ps []Person, name string) []Person {
 	var out []Person
 	for _, v := range ps {
