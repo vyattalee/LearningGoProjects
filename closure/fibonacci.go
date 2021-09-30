@@ -1,24 +1,19 @@
 package main
 
-import (
-	"fmt"
-)
-
-func fibonacci() func() int {
-	b0 := 0
-	b1 := 1
-	return func() int {
-		tmp := b0 + b1
-		b0 = b1
-		b1 = tmp
-		return b1
-	}
-
-}
+import "fmt"
 
 func main() {
-	myFibonacci := fibonacci()
-	for i := 1; i <= 15; i++ {
-		fmt.Println(myFibonacci())
+	gen := makeFibGen()
+	for i := 0; i < 11; i++ {
+		fmt.Println(gen())
+	}
+}
+
+func makeFibGen() func() int {
+	f1 := 0
+	f2 := 1
+	return func() int {
+		f2, f1 = (f1 + f2), f2
+		return f1
 	}
 }
