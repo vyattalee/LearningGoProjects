@@ -25,15 +25,26 @@ func NewDeck() Deck {
 	deck.ID = uuid.New()
 
 	println("A:", ACE, "  CLUB:", CLUB)
-
-	for _, suit := range SUITS {
-		for _, rank := range RANKS {
-			card := NewCard(rank, suit)
-			println(card.name)
-			deck.Cards = append(deck.Cards, card)
+	//for range generate the random
+	for suit, svalue := range SUITS {
+		if suit < Joker {
+			for rank, rvalue := range RANKS {
+				card := NewCard(rank, suit)
+				println(card.name, suit, rank, svalue, rvalue)
+				deck.Cards = append(deck.Cards, card)
+			}
+		} else if suit == Joker {
+			white_joker := NewCard(52, suit)
+			println(white_joker.name, suit, 52)
+			deck.Cards = append(deck.Cards, white_joker)
+		} else {
+			black_joker := NewCard(53, suit)
+			println(black_joker.name, suit, 52)
+			deck.Cards = append(deck.Cards, black_joker)
 		}
 
 	}
+
 	deck = deck.Shuffle()
 	return deck
 }
@@ -47,8 +58,8 @@ func (d Deck) Shuffle() Deck {
 }
 
 func (d *Deck) DumpCards() {
-	for card := range d.Cards {
-		println(card)
+	for i, card := range d.Cards {
+		println("第", i+1, "张牌:", card.name)
 
 	}
 }

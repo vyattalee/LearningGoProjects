@@ -10,13 +10,13 @@ func NewCard(rank Rank, suit Suit) Card {
 	return Card{
 		_rank: rank,
 		_suit: suit,
-		name:  REV_SUITS[suit] + REV_RANKS[rank]}
+		name:  SUITS[suit] + RANKS[rank]}
 }
 
 func (c *Card) Suit() string {
-	return REV_SUITS[c._suit]
+	return SUITS[c._suit]
 }
 
 func (c *Card) Rank() string {
-	return REV_RANKS[c._rank]
+	return RANKS[c._rank]
 }
