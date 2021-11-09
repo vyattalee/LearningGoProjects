@@ -120,8 +120,8 @@ func (d *Deck) DefaultCompare(i, j Card) CompareResult {
 	return 0
 }
 
-// Draw card from deck
-func (d *Deck) Draw(numberOfCards int) Deck {
+// DrawCards card from deck
+func (d *Deck) DrawCards(numberOfCards int) Deck {
 
 	newD := NewDeck()
 	var draw = (*d).Cards[len((*d).Cards)-numberOfCards : len((*d).Cards)]
