@@ -6,6 +6,9 @@ type Suit int
 // Rank represents the face of the card (ace, two...queen, king)
 type Rank int
 
+// CompareResult is the custom type returned when comparing cards
+type CompareResult int
+
 // Constants for Suit ♠♥♦♣
 const (
 	CLUB Suit = iota

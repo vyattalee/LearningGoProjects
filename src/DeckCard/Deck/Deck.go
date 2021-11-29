@@ -39,7 +39,7 @@ func NewDeck() Deck {
 			deck.Cards = append(deck.Cards, white_joker)
 		} else {
 			black_joker := NewCard(53, suit)
-			println(black_joker.name, suit, 52)
+			println(black_joker.name, suit, 53)
 			deck.Cards = append(deck.Cards, black_joker)
 		}
 
@@ -57,9 +57,82 @@ func (d Deck) Shuffle() Deck {
 	return d
 }
 
+// ShufflePerm uses rand.Perm instead of the many calls to rand.Intn.
+//  When compared to the current implementation:
+//
+//  benchmark                        old ns/op     new ns/op     delta
+//  BenchmarkTinyDeckShuffle-8       524           537           +2.48%
+//  BenchmarkSmallDeckShuffle-8      1119          1070          -4.38%
+//  BenchmarkMediumDeckShuffle-8     1611          1626          +0.93%
+//  BenchmarkDeckShuffle-8           2115          2194          +3.74%
+//  BenchmarkLargeDeckShuffle-8      21301         21408         +0.50%
+//
+//  Conclusion: Not Recommended
+func (d *Deck) ShufflePerm() {
+	N := len(d.Cards)
+	perm := rand.Perm(N)
+	for i := 0; i < N; i++ {
+		d.Cards[perm[i]], d.Cards[i] = d.Cards[i], d.Cards[perm[i]]
+	}
+}
+
+// NumberOfCards is a utility function that tells you how many cards are left in the deck
+func (d *Deck) NumberOfCards() int {
+	return len(d.Cards)
+}
+
+// Deal distributes cards to other decks/hands
+func (d *Deck) Deal(cards int, hands ...*Deck) {
+	for i := 0; i < cards; i++ {
+		for _, hand := range hands {
+			card := d.Cards[0]
+			d.Cards = d.Cards[1:]
+			hand.Cards = append(hand.Cards, card)
+		}
+	}
+}
 func (d *Deck) DumpCards() {
 	for i, card := range d.Cards {
 		println("第", i+1, "张牌:", card.name)
 
 	}
+}
+
+// DefaultCompare is the default comparison function
+// Currently not used in any games.
+func (d *Deck) DefaultCompare(i, j Card) CompareResult {
+	if i.Rank() > j.Rank() {
+		return 1
+	}
+
+	if i.Rank() < j.Rank() {
+		return -1
+	}
+
+	if i.Suit() > j.Suit() {
+		return 1
+	}
+
+	if i.Suit() < j.Suit() {
+		return -1
+	}
+
+	return 0
+}
+
+// DrawCards card from deck
+func (d *Deck) DrawCards(numberOfCards int) Deck {
+
+	newD := NewDeck()
+	var draw = (*d).Cards[len((*d).Cards)-numberOfCards : len((*d).Cards)]
+	(*d).Cards = (*d).Cards[:len((*d).Cards)-numberOfCards]
+
+	newD.Cards = draw
+
+	return newD
+}
+
+// AddCard : add card to top of deck
+func (d *Deck) AddCard(card Card) {
+	(*d).Cards = append((*d).Cards, card)
 }
