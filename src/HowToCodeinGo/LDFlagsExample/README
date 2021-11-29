@@ -1,0 +1,5 @@
+macOS & Linux
+go build -v -ldflags="-X 'main.Version=v1.0.0' -X 'HowToCodeinGo/LDFlagsExample/build.User=$(id -u -n)' -X 'HowToCodeinGo/LDFlagsExample/build/build.Time=$(date)'"
+
+window
+go build -v -ldflags="-X 'main.Version=v1.1.0' -X 'HowToCodeinGo/LDFlagsExample/build.User=whoami /UPN' -X 'HowToCodeinGo/LDFlagsExample/build/build.Time=date /t'"

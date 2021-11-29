@@ -5,7 +5,7 @@ package main
 //'build/build.Time=$(date)'"
 
 import (
-	"build"
+	"HowToCodeinGo/LDFlagsExample/build"
 	"fmt"
 )
 

@@ -1,0 +1,1 @@
+go build -i -ldflags -H=windowsgui main.go
