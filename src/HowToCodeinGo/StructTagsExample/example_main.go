@@ -76,6 +76,7 @@ func main() {
 	fmt.Println(anotherPerson)
 
 	newXml, _ := xml.Marshal(anotherPerson)
-	fmt.Println((newXml))
+	//data, _ := base64.StdEncoding.DecodeString(string(newXml))
+	fmt.Println(string(newXml))
 
 }
