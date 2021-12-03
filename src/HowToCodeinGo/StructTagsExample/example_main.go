@@ -58,8 +58,9 @@ func main() {
     }`
 
 	person := new(User)
-	json.Unmarshal([]byte(jsonString), person)
+	_ = json.Unmarshal([]byte(jsonString), person)
 	fmt.Println(person)
+	//fmt.Println(ok)
 
 	newJson, _ := json.Marshal(person)
 	fmt.Printf("%s\n", newJson)
@@ -71,7 +72,7 @@ func main() {
 </xml>`
 
 	anotherPerson := new(User)
-	xml.Unmarshal([]byte(xmlString), anotherPerson)
+	_ = xml.Unmarshal([]byte(xmlString), anotherPerson)
 	fmt.Println(anotherPerson)
 
 	newXml, _ := xml.Marshal(anotherPerson)
