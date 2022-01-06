@@ -32,6 +32,9 @@ func main() {
 	processorsClient := client.NewProcessorsClient(cc1)
 	processorsClient.GetProcessorsInfo()
 
+	memoryClient := client.NewMemoryClient(cc1)
+	memoryClient.GetMemoryInfo()
+
 	log.Println("Resource Monitor Finished! ")
 
 }

@@ -12,11 +12,7 @@ import (
 	"net/http"
 )
 
-func runGRPCServer(
-	processorsServer pb.ProcessorsServiceServer,
-	enableTLS bool,
-	listener net.Listener,
-) error {
+func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.MemoryServiceServer, enableTLS bool, listener net.Listener) error {
 
 	serverOptions := []grpc.ServerOption{
 		//grpc.UnaryInterceptor(interceptor.Unary()),
@@ -35,17 +31,13 @@ func runGRPCServer(
 	grpcServer := grpc.NewServer(serverOptions...)
 
 	pb.RegisterProcessorsServiceServer(grpcServer, processorsServer)
+	pb.RegisterMemoryServiceServer(grpcServer, memoryServer)
 
 	log.Printf("Start GRPC server at %s, TLS = %t", listener.Addr().String(), enableTLS)
 	return grpcServer.Serve(listener)
 }
 
-func runRESTServer(
-	processorsServer pb.ProcessorsServiceServer,
-	enableTLS bool,
-	listener net.Listener,
-	grpcEndpoint string,
-) error {
+func runRESTServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.MemoryServiceServer, enableTLS bool, listener net.Listener, grpcEndpoint string) error {
 	mux := runtime.NewServeMux()
 	//dialOptions := []grpc.DialOption{grpc.WithInsecure()}
 
@@ -71,6 +63,8 @@ func main() {
 
 	processors_server := service.NewProcessorsServer()
 
+	memory_server := service.NewMemoryServer()
+
 	address := fmt.Sprintf("0.0.0.0:%d", *port)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
@@ -78,9 +72,9 @@ func main() {
 	}
 
 	if *serverType == "grpc" {
-		err = runGRPCServer(processors_server, *enableTLS, listener)
+		err = runGRPCServer(processors_server, memory_server, *enableTLS, listener)
 	} else {
-		err = runRESTServer(processors_server, *enableTLS, listener, *endPoint)
+		err = runRESTServer(processors_server, memory_server, *enableTLS, listener, *endPoint)
 	}
 
 	if err != nil {
