@@ -1,13 +1,13 @@
 package Deck
 
 import (
-	"github.com/google/uuid"
+	. "github.com/google/uuid"
 	"math/rand"
 	"time"
 )
 
 type Deck struct {
-	ID    uuid.UUID
+	ID    UUID
 	Cards []Card
 }
 
@@ -22,7 +22,7 @@ func init() {
 func NewDeck() Deck {
 	deck := Deck{}
 
-	deck.ID = uuid.New()
+	deck.ID = New()
 
 	println("A:", ACE, "  CLUB:", CLUB)
 	//for range generate the random
