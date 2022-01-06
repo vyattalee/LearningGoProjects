@@ -61,8 +61,8 @@ func main() {
 	endPoint := flag.String("endpoint", "", "gRPC endpoint")
 	flag.Parse()
 
+	//each server's service must be register to grpcserver
 	processors_server := service.NewProcessorsServer()
-
 	memory_server := service.NewMemoryServer()
 
 	address := fmt.Sprintf("0.0.0.0:%d", *port)
