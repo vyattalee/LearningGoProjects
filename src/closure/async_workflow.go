@@ -1,16 +1,29 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 func main() {
+
+	var wg sync.WaitGroup
 	a, b := 1, 2
 	// b := 2
-	// go func() {
-	result := doWork1(a, b)
-	result = doWork2(result)
-	result = doWork3(result)
-	// Use the final result
-	// }()
+	wg.Add(1)
+	go func() {
+		// wg.Add(1)
+		defer wg.Done()
+		result := doWork1(a, b)
+		result()
+		result = doWork2(result)
+		result()
+		result = doWork3(result)
+		result()
+		// Use the final result
+	}()
+
+	wg.Wait()
 	fmt.Println("hi!")
 	fmt.Println("vim-go")
 }

@@ -1,0 +1,23 @@
+syntax="proto3";
+
+package LearningGoProjects.ResourceMonitor;
+
+option go_package = ".;pb";
+
+message GetProcessorsRequest{};
+
+message GetProcessorsResponse{};
+
+service ProcessorsService {
+  rpc GetProcessorsInfo(GetProcessorsRequest) returns (GetProcessorsResponse){};
+
+}
+
+message GetMemoryRequest{};
+
+message GetMemoryResponse{};
+
+service MemoryService {
+  rpc GetMemoryInfo(GetMemoryRequest) returns (GetMemoryResponse){};
+
+}
