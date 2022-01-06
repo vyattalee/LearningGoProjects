@@ -4,9 +4,18 @@ package LearningGoProjects.ResourceMonitor;
 
 option go_package = ".;pb";
 
+import "processors_message.proto";
+import "memory_message.proto";
+
+
 message GetProcessorsRequest{};
 
-message GetProcessorsResponse{};
+message GetProcessorsResponse{
+  CPU cpu = 1;
+  GPU gpu = 2;
+
+
+};
 
 service ProcessorsService {
   rpc GetProcessorsInfo(GetProcessorsRequest) returns (GetProcessorsResponse){};
