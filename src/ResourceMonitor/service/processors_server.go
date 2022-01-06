@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
-	"github.com/google/uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	//"github.com/shirou/gopsutil"
+	"github.com/shirou/gopsutil/cpu"
+	"time"
+
 	"log"
 )
 
@@ -20,50 +21,32 @@ func NewProcessorsServer() *ProcessorsServer {
 	return &ProcessorsServer{}
 }
 
+func GetCpuPercent() float64 {
+	percent, _ := cpu.Percent(time.Second, false)
+	return percent[0]
+}
+
 // CreateLaptop is a unary RPC to create a new laptop
 func (server *ProcessorsServer) GetProcessorsInfo(
 	ctx context.Context,
 	req *pb.GetProcessorsRequest,
 ) (*pb.GetProcessorsResponse, error) {
-	laptop := req.GetLaptop()
-	log.Printf("receive a create-laptop request with id: %s", laptop.Id)
+	request := req.String()
+	log.Printf("service get local processors info %s", request)
 
-	if len(laptop.Id) > 0 {
-		// check if it's a valid UUID
-		_, err := uuid.Parse(laptop.Id)
-		if err != nil {
-			return nil, status.Errorf(codes.InvalidArgument, "laptop ID is not a valid UUID: %v", err)
-		}
-	} else {
-		id, err := uuid.NewRandom()
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "cannot generate a new laptop ID: %v", err)
-		}
-		laptop.Id = id.String()
+	info, _ := cpu.Info() //总体信息
+	fmt.Println(info)
+	//output：	[{"cpu":0,cores":4,"modelName":"Intel(R) Core(TM) i5-2520M CPU @ 2.50GHz","mhz":2501,。。。]
+
+	ci := &pb.CPU{
+		Name:          info[0].ModelName,
+		Brand:         info[0].VendorID,
+		NumberCores:   uint32(info[0].Cores),
+		NumberThreads: uint32(info[0].Cores),
+		MaxGhz:        info[0].Mhz,
+		MinGhz:        info[0].Mhz,
 	}
 
-	// some heavy processing
-	// time.Sleep(6 * time.Second)
-
-	if err := contextError(ctx); err != nil {
-		return nil, err
-	}
-
-	// save the laptop to store
-	err := server.laptopStore.Save(laptop)
-	if err != nil {
-		code := codes.Internal
-		if errors.Is(err, ErrAlreadyExists) {
-			code = codes.AlreadyExists
-		}
-
-		return nil, status.Errorf(code, "cannot save laptop to the store: %v", err)
-	}
-
-	log.Printf("saved laptop with id: %s", laptop.Id)
-
-	res := &pb.CreateLaptopResponse{
-		Id: laptop.Id,
-	}
+	res := &pb.GetProcessorsResponse{Cpu: ci}
 	return res, nil
 }

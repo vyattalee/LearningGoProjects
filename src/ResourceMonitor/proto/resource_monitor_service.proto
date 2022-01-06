@@ -24,7 +24,9 @@ service ProcessorsService {
 
 message GetMemoryRequest{};
 
-message GetMemoryResponse{};
+message GetMemoryResponse{
+  Memory mem = 1;
+};
 
 service MemoryService {
   rpc GetMemoryInfo(GetMemoryRequest) returns (GetMemoryResponse){};
