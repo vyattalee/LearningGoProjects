@@ -77,11 +77,12 @@ func (processorsClient *ProcessorsClient) SubscribeProcessorsInfo() error {
 				return
 			}
 			if err != nil {
+				stream.CloseSend()
 				waitResponse <- fmt.Errorf("cannot receive stream response: %v", err)
 				return
 			}
 
-			log.Print("received SubscribeProcessorsInfo response: ", res)
+			log.Print("received SubscribeProcessorsInfo response: %s", res.Cpu)
 		}
 	}()
 

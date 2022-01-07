@@ -7,9 +7,11 @@ import (
 	"github.com/LearningGoProjects/ResourceMonitor/service"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 	"log"
 	"net"
 	"net/http"
+	"time"
 )
 
 func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.MemoryServiceServer, enableTLS bool, listener net.Listener) error {
@@ -17,6 +19,9 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 	serverOptions := []grpc.ServerOption{
 		//grpc.UnaryInterceptor(interceptor.Unary()),
 		//grpc.StreamInterceptor(interceptor.Stream()),
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			MaxConnectionIdle: 5 * time.Minute, //这个连接最大的空闲时间，超过就释放，解决proxy等到网络问题（不通知grpc的client和server）
+		}),
 	}
 
 	//if enableTLS {
