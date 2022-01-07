@@ -7,12 +7,14 @@ option go_package = ".;pb";
 import "memory_message.proto";
 
 message CPU {
-  string brand = 1;
-  string name = 2;
-  uint32 number_cores = 3;
-  uint32 number_threads = 4;
-  double min_ghz = 5;
-  double max_ghz = 6;
+  int32 cpuId = 7;
+  string vendorId = 8;
+  string modelName = 9;
+  double mhz = 10;
+  int32 cacheSize = 11;
+  repeated string flags = 12;
+  double usedPercent = 13;
+
 }
 
 message GPU {

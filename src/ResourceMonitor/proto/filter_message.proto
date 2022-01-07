@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package LearningGoProjects.ResourceMonitor;
+
+option go_package = ".;pb";
+
+message Filter {
+  int32 sampling_period = 4; //unit second
+
+}

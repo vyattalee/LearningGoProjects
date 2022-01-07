@@ -6,12 +6,15 @@ option go_package = ".;pb";
 
 import "processors_message.proto";
 import "memory_message.proto";
+import "filter_message.proto";
 
 
-message GetProcessorsRequest{};
+message GetProcessorsRequest{
+  Filter filter = 1;
+};
 
 message GetProcessorsResponse{
-  CPU cpu = 1;
+  repeated CPU cpu = 1;
   GPU gpu = 2;
 
 
@@ -19,6 +22,7 @@ message GetProcessorsResponse{
 
 service ProcessorsService {
   rpc GetProcessorsInfo(GetProcessorsRequest) returns (GetProcessorsResponse){};
+  rpc SubscribeProcesssorsInfo(GetProcessorsRequest) returns (stream GetProcessorsResponse);
 
 }
 
