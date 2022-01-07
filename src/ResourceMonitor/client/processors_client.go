@@ -2,10 +2,12 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"io"
 	"log"
 	"time"
 )
@@ -21,7 +23,7 @@ func NewProcessorsClient(cc *grpc.ClientConn) *ProcessorsClient {
 	return &ProcessorsClient{service}
 }
 
-// CreateLaptop calls create laptop RPC
+// ProcessorsClient calls GetProcessorsInfo RPC
 func (processorsClient *ProcessorsClient) GetProcessorsInfo() {
 	req := &pb.GetProcessorsRequest{}
 
@@ -45,4 +47,45 @@ func (processorsClient *ProcessorsClient) GetProcessorsInfo() {
 	gpuinfo := res.GetGpu()
 
 	log.Printf("processors info  \r\n -->cpu: %s,\r\n -->gpu: %s", cpuinfo, gpuinfo)
+}
+
+// ProcessorsClient calls SubscribeProcessorsInfo RPC
+func (processorsClient *ProcessorsClient) SubscribeProcessorsInfo() error {
+
+	req := &pb.GetProcessorsRequest{}
+
+	ctx := context.Background()
+	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	//defer cancel()
+
+	log.Println("processorsClient.service.SubscribeProcessorsInfo(ctx, req)")
+
+	stream, err := processorsClient.service.SubscribeProcessorsInfo(ctx, req)
+	if err != nil {
+		return fmt.Errorf("cannot subscrible processors: %v", err)
+	}
+
+	waitResponse := make(chan error)
+	// go routine to receive responses
+	go func() {
+		log.Println("processors client go routine")
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				log.Print("no more responses")
+				waitResponse <- nil
+				return
+			}
+			if err != nil {
+				waitResponse <- fmt.Errorf("cannot receive stream response: %v", err)
+				return
+			}
+
+			log.Print("received SubscribeProcessorsInfo response: ", res)
+		}
+	}()
+
+	err = <-waitResponse
+	log.Println("err = <-waitResponse", err)
+	return err
 }

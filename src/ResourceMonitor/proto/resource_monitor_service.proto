@@ -22,7 +22,7 @@ message GetProcessorsResponse{
 
 service ProcessorsService {
   rpc GetProcessorsInfo(GetProcessorsRequest) returns (GetProcessorsResponse){};
-  rpc SubscribeProcesssorsInfo(GetProcessorsRequest) returns (stream GetProcessorsResponse);
+  rpc SubscribeProcessorsInfo(GetProcessorsRequest) returns (stream GetProcessorsResponse);
 
 }
 

@@ -30,9 +30,14 @@ func main() {
 	}
 
 	processorsClient := client.NewProcessorsClient(cc1)
+	log.Println("processorsClient call GetProcessorsInfo RPC")
 	processorsClient.GetProcessorsInfo()
 
+	log.Println("processorsClient call SubscribeProcessorsInfo RPC")
+	processorsClient.SubscribeProcessorsInfo()
+
 	memoryClient := client.NewMemoryClient(cc1)
+	log.Println("memoryClient call GetMemoryInfo RPC")
 	memoryClient.GetMemoryInfo()
 
 	log.Println("Resource Monitor Finished! ")
