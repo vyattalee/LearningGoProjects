@@ -33,12 +33,12 @@ func main() {
 	log.Println("processorsClient call GetProcessorsInfo RPC")
 	processorsClient.GetProcessorsInfo()
 
-	log.Println("processorsClient call SubscribeProcessorInfo RPC")
-	processorsClient.SubscribeProcessorInfo()
+	//log.Println("processorsClient call SubscribeProcessorInfo RPC")
+	//processorsClient.SubscribeProcessorInfo()
 
 	//SubscribeProcessorsInfo stream RPC has some issues:rpc error: code = Internal desc = grpc: failed to unmarshal the received message failed to unmarshal, message is <nil>, want proto.Message
-	//log.Println("processorsClient call SubscribeProcessorsInfo RPC")
-	//processorsClient.SubscribeProcessorsInfo()
+	log.Println("processorsClient call SubscribeProcessorsInfo RPC")
+	processorsClient.SubscribeProcessorsInfo()
 
 	memoryClient := client.NewMemoryClient(cc1)
 	log.Println("memoryClient call GetMemoryInfo RPC")

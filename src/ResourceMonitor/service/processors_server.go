@@ -23,6 +23,52 @@ func NewProcessorsServer() *ProcessorsServer {
 	return &ProcessorsServer{}
 }
 
+func NewCPU() *pb.CPU {
+
+	//CpuId       int32    `protobuf:"varint,1,opt,name=cpuId,proto3" json:"cpuId,omitempty"`
+	//VendorId    string   `protobuf:"bytes,2,opt,name=vendorId,proto3" json:"vendorId,omitempty"`
+	//ModelName   string   `protobuf:"bytes,3,opt,name=modelName,proto3" json:"modelName,omitempty"`
+	//Mhz         float64  `protobuf:"fixed64,4,opt,name=mhz,proto3" json:"mhz,omitempty"`
+	//CacheSize   int32    `protobuf:"varint,5,opt,name=cacheSize,proto3" json:"cacheSize,omitempty"`
+	//Flags       []string `protobuf:"bytes,6,rep,name=flags,proto3" json:"flags,omitempty"`
+	//UsedPercent float64  `protobuf:"fixed64,7,opt,name=usedPercent,proto3" json:"usedPercent,omitempty"`
+
+	cpu := &pb.CPU{
+		CpuId:       0,
+		VendorId:    "",
+		ModelName:   "",
+		Mhz:         0,
+		CacheSize:   0,
+		Flags:       []string{""},
+		UsedPercent: 0.0,
+	}
+
+	return cpu
+}
+
+// NewGPU returns a new sample GPU
+func NewGPU() *pb.GPU {
+	brand := randomGPUBrand()
+	name := randomGPUName(brand)
+
+	minGhz := randomFloat64(1.0, 1.5)
+	maxGhz := randomFloat64(minGhz, 2.0)
+	memGB := randomInt(2, 6)
+
+	gpu := &pb.GPU{
+		Brand:  brand,
+		Name:   name,
+		MinGhz: minGhz,
+		MaxGhz: maxGhz,
+		Memory: &pb.Memory{
+			Value: uint64(memGB),
+			Unit:  pb.Memory_GIGABYTE,
+		},
+	}
+
+	return gpu
+}
+
 func GetCpuInfo() ([]cpu.InfoStat, error) {
 	cpuInfos, err := cpu.Info()
 	if err != nil {
@@ -52,7 +98,11 @@ func (server *ProcessorsServer) GetProcessorsInfo(
 		return nil, err
 	}
 
-	res := &pb.GetProcessorsResponse{Cpus: ci}
+	res := &pb.GetProcessorsResponse{
+		Cpus: ci,
+		//Cpus:     []*pb.CPU{NewCPU()},
+		//Cpus: []*pb.CPU{ci},
+	}
 	return res, nil
 
 }
@@ -179,7 +229,8 @@ func (server *ProcessorsServer) SubscribeProcessorsInfo(
 				}
 				log.Println(len(ci), "&&&&&&&&SubscribeProcessorsInfo collect resource: ", ci)
 
-				res := &pb.GetProcessorsResponse{Cpus: ci}
+				res := &pb.GetProcessorsResponse{Gpu: NewGPU()}
+				//res := &pb.GetProcessorsResponse{Cpus: ci}
 
 				log.Println("&pb.GetProcessorsResponse{Cpu: ci}", res)
 

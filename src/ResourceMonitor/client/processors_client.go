@@ -49,7 +49,7 @@ func (processorsClient *ProcessorsClient) GetProcessorsInfo() {
 	log.Printf("processors info  \r\n -->cpu: %s,\r\n -->gpu: %s", cpuinfo, gpuinfo)
 }
 
-// ProcessorsClient calls SubscribeProcessorsInfo RPC
+// ProcessorsClient calls SubscribeProcessorInfo RPC
 func (processorsClient *ProcessorsClient) SubscribeProcessorInfo() error {
 
 	req := &pb.GetProcessorsRequest{}
@@ -124,7 +124,8 @@ func (processorsClient *ProcessorsClient) SubscribeProcessorsInfo() error {
 				return
 			}
 
-			log.Println("received SubscribeProcessorsInfo response: ", res.GetCpus(), stream.RecvMsg(nil))
+			log.Println("received SubscribeProcessorsInfo response cpus: ", res.GetCpus(), stream.RecvMsg(nil))
+			log.Println("received SubscribeProcessorsInfo response gpu: ", res.GetGpu(), stream.RecvMsg(nil))
 		}
 	}()
 
