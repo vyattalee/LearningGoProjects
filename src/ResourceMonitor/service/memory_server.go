@@ -49,7 +49,7 @@ func (server *MemoryServer) GetMemoryInfo(
 	log.Printf("service get local Memory info %s", request)
 
 	info, _ := mem.VirtualMemory()
-	fmt.Println(info)
+	//fmt.Println(info)
 	info2, _ := mem.SwapMemory()
 	fmt.Println(info2)
 

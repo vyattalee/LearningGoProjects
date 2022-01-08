@@ -14,7 +14,8 @@ message GetProcessorsRequest{
 };
 
 message GetProcessorsResponse{
-  repeated CPU cpu = 1;
+  CPU cpu =3;
+  repeated CPU cpus = 1;
   GPU gpu = 2;
 
 
@@ -22,6 +23,7 @@ message GetProcessorsResponse{
 
 service ProcessorsService {
   rpc GetProcessorsInfo(GetProcessorsRequest) returns (GetProcessorsResponse){};
+  rpc SubscribeProcessorInfo(GetProcessorsRequest) returns (stream GetProcessorsResponse);
   rpc SubscribeProcessorsInfo(GetProcessorsRequest) returns (stream GetProcessorsResponse);
 
 }
