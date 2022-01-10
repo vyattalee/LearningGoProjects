@@ -43,7 +43,8 @@ func (processorsClient *ProcessorsClient) GetProcessorsInfo() {
 		return
 	}
 
-	cpuinfo := res.GetCpus()
+	cpuinfo := res.GetCpu()
+	//cpuinfo := res.GetCpus()
 	gpuinfo := res.GetGpu()
 
 	log.Printf("processors info  \r\n -->cpu: %s,\r\n -->gpu: %s", cpuinfo, gpuinfo)
@@ -92,44 +93,44 @@ func (processorsClient *ProcessorsClient) SubscribeProcessorInfo() error {
 }
 
 // ProcessorsClient calls SubscribeProcessorsInfo RPC
-func (processorsClient *ProcessorsClient) SubscribeProcessorsInfo() error {
-
-	req := &pb.GetProcessorsRequest{}
-
-	ctx := context.Background()
-	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	//defer cancel()
-
-	log.Println("processorsClient.service.SubscribeProcessorsInfo(ctx, req)")
-
-	stream, err := processorsClient.service.SubscribeProcessorsInfo(ctx, req)
-	if err != nil {
-		return fmt.Errorf("cannot subscrible processors: %v", err)
-	}
-
-	waitResponse := make(chan error)
-	// go routine to receive responses
-	go func() {
-		log.Println("processors client go routine")
-		for {
-			res, err := stream.Recv()
-			if err == io.EOF {
-				log.Print("no more responses")
-				waitResponse <- nil
-				return
-			}
-			if err != nil {
-				stream.CloseSend()
-				waitResponse <- fmt.Errorf("cannot receive stream response: %v", err)
-				return
-			}
-
-			log.Println("received SubscribeProcessorsInfo response cpus: ", res.GetCpus(), stream.RecvMsg(nil))
-			log.Println("received SubscribeProcessorsInfo response gpu: ", res.GetGpu(), stream.RecvMsg(nil))
-		}
-	}()
-
-	err = <-waitResponse
-	log.Println("err = <-waitResponse", err)
-	return err
-}
+//func (processorsClient *ProcessorsClient) SubscribeProcessorsInfo() error {
+//
+//	req := &pb.GetProcessorsRequest{}
+//
+//	ctx := context.Background()
+//	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+//	//defer cancel()
+//
+//	log.Println("processorsClient.service.SubscribeProcessorsInfo(ctx, req)")
+//
+//	stream, err := processorsClient.service.SubscribeProcessorsInfo(ctx, req)
+//	if err != nil {
+//		return fmt.Errorf("cannot subscrible processors: %v", err)
+//	}
+//
+//	waitResponse := make(chan error)
+//	// go routine to receive responses
+//	go func() {
+//		log.Println("processors client go routine")
+//		for {
+//			res, err := stream.Recv()
+//			if err == io.EOF {
+//				log.Print("no more responses")
+//				waitResponse <- nil
+//				return
+//			}
+//			if err != nil {
+//				stream.CloseSend()
+//				waitResponse <- fmt.Errorf("cannot receive stream response: %v", err)
+//				return
+//			}
+//
+//			log.Println("received SubscribeProcessorsInfo response cpus: ", res.GetCpus(), stream.RecvMsg(nil))
+//			log.Println("received SubscribeProcessorsInfo response gpu: ", res.GetGpu(), stream.RecvMsg(nil))
+//		}
+//	}()
+//
+//	err = <-waitResponse
+//	log.Println("err = <-waitResponse", err)
+//	return err
+//}
