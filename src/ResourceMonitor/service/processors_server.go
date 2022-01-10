@@ -6,6 +6,7 @@ import (
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
 	//"github.com/shirou/gopsutil"
 	"github.com/shirou/gopsutil/cpu"
 	"time"
@@ -156,49 +157,54 @@ func (server *ProcessorsServer) SubscribeProcessorInfo(
 	ticker := time.NewTicker(3 * time.Second)
 	quit := make(chan struct{})
 	waitResponse := make(chan error)
+	ctx := stream.Context()
 
 	go func() error {
 		log.Println("processor server go routine")
-		//for {
 
-		select {
-		case <-ticker.C:
-			// do stuff
-			log.Println("begin to collect resource info")
-			ci, err := collectResource()
-			if err != nil {
-				waitResponse <- fmt.Errorf("cannot collectResource err: %v", err)
-				return err
+		for {
+			select {
+			case <-ticker.C:
+				// do stuff
+				log.Println("begin to collect resource info")
+				ci, err := collectResource()
+				if err != nil {
+					waitResponse <- fmt.Errorf("cannot collectResource err: %v", err)
+					return err
+				}
+				log.Println(len(ci), "&&&&&&&&SubscribeProcessorInfo collect resource: ", ci)
+
+				//cpuinfo := &pb.CPU{
+				//	VendorId:"GenuineIntel" ,
+				//	ModelName:"Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz",
+				//	Mhz:2600,
+				//	CacheSize:256,
+				//
+				//	UsedPercent:6.99999999999999}//cpuinfo
+
+				res := &pb.GetProcessorsResponse{Cpu: ci[0]}
+
+				log.Println("&pb.GetProcessorsResponse{Cpu: ci}", res)
+
+				err = stream.Send(res)
+				if err != nil {
+					waitResponse <- fmt.Errorf("cannot send stream response: %v", err)
+					return logError(status.Errorf(codes.Unknown, "cannot send stream response: %v", err, stream.SendMsg(nil)))
+				}
+
+			case <-quit:
+				ticker.Stop()
+				return logError(status.Errorf(codes.Aborted, "quit signal received and ticker stop "))
+
+			case <-ctx.Done():
+				ticker.Stop()
+				return logError(status.Errorf(codes.Aborted, "quit signal received and ticker stop "))
+
 			}
-			log.Println(len(ci), "&&&&&&&&SubscribeProcessorInfo collect resource: ", ci)
+			//return nil
+			//waitResponse <- nil
 
-			//cpuinfo := &pb.CPU{
-			//	VendorId:"GenuineIntel" ,
-			//	ModelName:"Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz",
-			//	Mhz:2600,
-			//	CacheSize:256,
-			//
-			//	UsedPercent:6.99999999999999}
-
-			//cpuinfo
-			res := &pb.GetProcessorsResponse{Cpu: ci[0]}
-
-			log.Println("&pb.GetProcessorsResponse{Cpu: ci}", res)
-
-			err = stream.Send(res)
-			if err != nil {
-				waitResponse <- fmt.Errorf("cannot send stream response: %v", err)
-				return logError(status.Errorf(codes.Unknown, "cannot send stream response: %v", err, stream.SendMsg(nil)))
-			}
-
-		case <-quit:
-			ticker.Stop()
-			return logError(status.Errorf(codes.Aborted, "quit signal received and ticker stop "))
-		}
-		return nil
-		//waitResponse <- nil
-
-		//}		// end for loop
+		} // end for loop
 	}()
 
 	err := <-waitResponse
