@@ -15,7 +15,7 @@ message GetProcessorsRequest{
 
 message GetProcessorsResponse{
   CPU cpu =3;
-  repeated CPU cpus = 1;
+//  repeated CPU cpus = 1;
   GPU gpu = 2;
 
 
