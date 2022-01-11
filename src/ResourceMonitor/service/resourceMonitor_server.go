@@ -1,10 +1,8 @@
 package service
 
 import (
+	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
-	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes/any"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	"log"
 	"sync"
 	"time"
@@ -85,18 +83,14 @@ func (server *ResourceMonitorServer) StartService() {
 			}
 			// Send data over the gRPC stream to the client
 			//s1 := fmt.Sprintf("data mock for: %d", id)
-			t1 := &timestamp.Timestamp{}
-			serialized, err := proto.Marshal(t1)
-			if err != nil {
-				log.Fatal("could not serialize string")
-			}
 
-			anydata := &any.Any{
-				TypeUrl: "example.com/resourcemonitor/" + proto.MessageName(t1),
-				Value:   serialized,
-			}
+			//anydata, err := anypb.New(wrapperspb.String(fmt.Sprintf("data mock for: %d", id)))
+			//if err != nil {
+			//	log.Fatal("could not An constructe any message containing another message value") // handle error
+			//}
 
-			if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
+			if err := sub.stream.Send(&pb.Response{ResourceData: fmt.Sprintf("data mock for: %d", id)}); err != nil {
+				//if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
 				log.Printf("Failed to send data to client: %v", err)
 				select {
 				case sub.finished <- true:

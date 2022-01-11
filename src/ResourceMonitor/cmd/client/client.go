@@ -30,18 +30,20 @@ func main() {
 
 	for i := 1; i <= 5; i++ {
 		wg.Add(1)
-		cc1, err := grpc.Dial(*serverAddress, transportOption)
+		client, err := client.MKResourceMonitorClient(int32(i), *serverAddress, transportOption)
 		if err != nil {
-			log.Fatal("cannot connecting server: ", err)
+			log.Fatal(err)
 		}
-
-		resourceMonitorClient := client.NewResourceMonitorClient(int32(i), cc1)
-		resourceMonitorClient.Subscribe()
+		// Dispatch client goroutine
+		go client.Start()
 		time.Sleep(time.Second * 2)
 	}
 
 	// The wait group purpose is to avoid exiting, the clients do not exit
 	wg.Wait()
+
+	//resourceMonitorClient := client.NewResourceMonitorClient(int32(i), cc1)
+	//resourceMonitorClient.Subscribe()
 
 	//processorsClient := client.NewProcessorsClient(cc1)
 	//log.Println("processorsClient call GetProcessorsInfo RPC")
