@@ -6,12 +6,12 @@ clean:
 	rm protos/longlived.pb.go protos/longlived_grpc.pb.go
 
 server:
-	go build server/server.go
-	./server
+	go run server/server.go
+# 	./server
 
 client:
-	go build client/client.go
-	./client
+	go run client/client.go
+# 	./client
 
 
 .PHONY: proto test clean server client

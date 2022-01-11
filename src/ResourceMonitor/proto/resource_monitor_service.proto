@@ -7,7 +7,38 @@ option go_package = ".;pb";
 import "processors_message.proto";
 import "memory_message.proto";
 import "filter_message.proto";
+import "google/protobuf/any.proto";
 
+
+message ServiceType{
+  enum T{
+    ProcessorService = 0;
+    MemoryService = 1;
+    StorageService = 2;
+
+  }
+}
+
+message Request{
+  int32 id = 1;
+  ServiceType serviceType = 2;
+}
+
+message Response{
+  google.protobuf.Any resourceData = 1;
+  //  oneof resource{
+  //    CPU cpu = 1;
+  //    GPU gpu = 2;
+  //    Memory memory = 3;
+  //
+  //  }
+}
+
+service ResourceMonitorService {
+  rpc Subscribe(Request) returns (stream Response);
+  rpc Unsubscribe(Request) returns (Response);
+
+}
 
 message GetProcessorsRequest{
   Filter filter = 1;
@@ -21,8 +52,10 @@ message GetProcessorsResponse{
 
 };
 
+
 service ProcessorsService {
   rpc GetProcessorsInfo(GetProcessorsRequest) returns (GetProcessorsResponse){};
+
   rpc SubscribeProcessorInfo(GetProcessorsRequest) returns (stream GetProcessorsResponse);
   rpc SubscribeProcessorsInfo(GetProcessorsRequest) returns (stream GetProcessorsResponse);
 

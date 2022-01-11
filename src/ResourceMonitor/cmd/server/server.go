@@ -35,8 +35,16 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 
 	grpcServer := grpc.NewServer(serverOptions...)
 
-	pb.RegisterProcessorsServiceServer(grpcServer, processorsServer)
-	pb.RegisterMemoryServiceServer(grpcServer, memoryServer)
+	resourceMonitorServer := &service.ResourceMonitorServer{}
+
+	// Register the server
+	pb.RegisterResourceMonitorServiceServer(grpcServer, resourceMonitorServer)
+
+	// Start sending data to subscribers
+	go resourceMonitorServer.StartService()
+
+	//pb.RegisterProcessorsServiceServer(grpcServer, processorsServer)
+	//pb.RegisterMemoryServiceServer(grpcServer, memoryServer)
 
 	log.Printf("Start GRPC server at %s, TLS = %t", listener.Addr().String(), enableTLS)
 	return grpcServer.Serve(listener)

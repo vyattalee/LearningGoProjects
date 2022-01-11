@@ -1,9 +1,9 @@
 package main
 
 import (
-	"../protos"
 	"context"
 	"fmt"
+	"github.com/LearningGoProjects/ResourceMonitor/reference_projects/longlived-grpc/protos"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -60,7 +60,7 @@ func (s *longlivedServer) Subscribe(request *protos.Request, stream protos.Longl
 		case <-fin:
 			log.Printf("Closing stream for client ID: %d", request.Id)
 			return nil
-		case <- ctx.Done():
+		case <-ctx.Done():
 			log.Printf("Client ID %d has disconnected", request.Id)
 			return nil
 		}

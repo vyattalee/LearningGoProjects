@@ -1,8 +1,8 @@
 package main
 
 import (
-	"../protos"
 	"context"
+	"github.com/LearningGoProjects/ResourceMonitor/reference_projects/longlived-grpc/protos"
 	"google.golang.org/grpc"
 	"log"
 	"sync"
