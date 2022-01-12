@@ -49,6 +49,7 @@ func (resourceMonitorClient *ResourceMonitorClient) Subscribe_OLD() error {
 			}
 			if err != nil {
 				stream.CloseSend()
+
 				waitResponse <- fmt.Errorf("cannot receive stream response: %v", err)
 				return
 			}
@@ -101,7 +102,9 @@ func (resourceMonitorClient *ResourceMonitorClient) Start() {
 			// Retry on failure
 			continue
 		}
-		log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData)
+		log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,
+			"\r\nresource-->CPU info:", response.GetCpu(),
+			"\r\nresource-->Memory info:", response.GetMemory())
 	}
 }
 

@@ -27,12 +27,11 @@ message Request{
 message Response{
   string resourceData = 1;
 //  google.protobuf.Any resourceData = 1;
-  //  oneof resource{
-  //    CPU cpu = 1;
-  //    GPU gpu = 2;
-  //    Memory memory = 3;
-  //
-  //  }
+    oneof resource{
+      CPU cpu = 2;
+      GPU gpu = 3;
+      Memory memory = 4;
+    }
 }
 
 service ResourceMonitorService {

@@ -94,7 +94,7 @@ func (server *ProcessorsServer) GetProcessorsInfo(
 	request := req.String()
 	log.Printf("service get local processors info %s", request)
 
-	ci, err := collectResource()
+	ci, err := CollectResource()
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (server *ProcessorsServer) GetProcessorsInfo(
 
 }
 
-func collectResource() ([]*pb.CPU, error) {
+func CollectResource() ([]*pb.CPU, error) {
 	cpuInfos, _ := GetCpuInfo() //总体信息
 
 	if cpuInfos == nil {
@@ -167,9 +167,9 @@ func (server *ProcessorsServer) SubscribeProcessorInfo(
 			case <-ticker.C:
 				// do stuff
 				log.Println("begin to collect resource info")
-				ci, err := collectResource()
+				ci, err := CollectResource()
 				if err != nil {
-					waitResponse <- fmt.Errorf("cannot collectResource err: %v", err)
+					waitResponse <- fmt.Errorf("cannot CollectResource err: %v", err)
 					return err
 				}
 				log.Println(len(ci), "&&&&&&&&SubscribeProcessorInfo collect resource: ", ci)
@@ -233,9 +233,9 @@ func (server *ProcessorsServer) SubscribeProcessorInfo(
 //			case <-ticker.C:
 //				// do stuff
 //				log.Println("begin to collect resource info")
-//				ci, err := collectResource()
+//				ci, err := CollectResource()
 //				if err != nil {
-//					waitResponse <- fmt.Errorf("cannot collectResource err: %v", err)
+//					waitResponse <- fmt.Errorf("cannot CollectResource err: %v", err)
 //					return err
 //				}
 //				log.Println(len(ci), "&&&&&&&&SubscribeProcessorsInfo collect resource: ", ci)

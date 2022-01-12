@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
+	"github.com/shirou/gopsutil/mem"
 	"log"
 	"sync"
 	"time"
@@ -89,7 +90,39 @@ func (server *ResourceMonitorServer) StartService() {
 			//	log.Fatal("could not An constructe any message containing another message value") // handle error
 			//}
 
-			if err := sub.stream.Send(&pb.Response{ResourceData: fmt.Sprintf("data mock for: %d", id)}); err != nil {
+			//if client id is odd, then send the cpu info to client
+			//if client id is even, then send the memory info to client
+
+			var err error
+			if id%2 == 0 {
+				ci, err := CollectResource()
+				if err != nil {
+
+					return false
+				}
+				resource := &pb.Response_Cpu{Cpu: ci[0]}
+				err = sub.stream.Send(&pb.Response{
+					ResourceData: fmt.Sprintf("data mock for: %d", id),
+					Resource:     resource,
+				})
+
+			} else {
+				info, _ := mem.VirtualMemory()
+				val, unit := ConvertMemory(info.Total)
+				resource := &pb.Response_Memory{
+					Memory: &pb.Memory{Value: val, Unit: unit},
+				}
+				err = sub.stream.Send(&pb.Response{
+					ResourceData: fmt.Sprintf("data mock for: %d", id),
+					Resource:     resource,
+				})
+			}
+
+			//if err := sub.stream.Send(&pb.Response{
+			//	ResourceData: fmt.Sprintf("data mock for: %d", id),
+			//	Resource: &pb.Response_Cpu{Cpu:ci[0]},
+			//}); err != nil {
+			if err != nil {
 				//if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
 				log.Printf("Failed to send data to client: %v", err)
 				select {

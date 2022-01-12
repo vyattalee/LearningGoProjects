@@ -42,8 +42,13 @@ func main() {
 	// The wait group purpose is to avoid exiting, the clients do not exit
 	wg.Wait()
 
+	//cc1, err := grpc.Dial(*serverAddress, transportOption)
+	//if err != nil {
+	//	log.Fatal("cannot dial server: ", err)
+	//}
+
 	//resourceMonitorClient := client.NewResourceMonitorClient(int32(i), cc1)
-	//resourceMonitorClient.Subscribe()
+	//resourceMonitorClient.Subscribe_OLD()
 
 	//processorsClient := client.NewProcessorsClient(cc1)
 	//log.Println("processorsClient call GetProcessorsInfo RPC")

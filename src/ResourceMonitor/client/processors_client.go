@@ -80,7 +80,7 @@ func (processorsClient *ProcessorsClient) SubscribeProcessorInfo() error {
 			if err != nil {
 				stream.CloseSend()
 				waitResponse <- fmt.Errorf("cannot receive stream response: %v", err)
-				return
+				continue
 			}
 
 			log.Println("received SubscribeProcessorInfo response: ", res.GetCpu(), stream.RecvMsg(nil))
