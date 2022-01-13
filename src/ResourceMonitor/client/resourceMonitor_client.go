@@ -2,8 +2,10 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"io"
 	"log"
@@ -117,18 +119,37 @@ func (resourceMonitorClient *ResourceMonitorClient) Start() {
 		//	data := &pb.Response_Memory{}
 		//}
 
-		//err = response.AnyResourceData.UnmarshalTo(&data)
+		//map[string]interface{} is good for everything
+		var data map[string]interface{}
+
+		err = json.Unmarshal(response.AnyResourceData.GetValue(), &data)
+		if err != nil {
+			log.Print("Error while unmarshaling the response.AnyResourceData.GetValue()")
+		}
+		//err = response.AnyResourceData.UnmarshalTo(data)
 		//if err != nil {
 		//	log.Print("Error while unmarshaling the endorsement")
 		//}
 
+		//unmarshal_cpu := &pb.Response_Cpu{}
+		//unmarshal_memory := &pb.Response_Memory{}
+		//TypeUrl can be used for select which kind of anyResourceData type.
+		unmarshal := &pb.Response{}
+		switch response.AnyResourceData.GetTypeUrl() {
+		case "anyResourceData_cpu":
+			ptypes.UnmarshalAny(response.AnyResourceData, unmarshal)
+		case "anyResourceData_memory":
+			ptypes.UnmarshalAny(response.AnyResourceData, unmarshal)
+
+		}
+
 		switch response.Resource.(type) {
 		case *pb.Response_Cpu:
 			log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,
-				"\r\nresource-->CPU info:", response.GetCpu())
+				"\r\nresource-->CPU info:", response.GetCpu(), "\r\n #########Any type Data:", data) //response.GetAnyResourceData()
 		case *pb.Response_Memory:
 			log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,
-				"\r\nresource-->Memory info:", response.GetMemory())
+				"\r\nresource-->Memory info:", response.GetMemory(), "\r\n #########Any type Data:", data)
 		}
 
 	}

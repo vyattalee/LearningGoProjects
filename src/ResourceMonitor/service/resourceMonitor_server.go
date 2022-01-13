@@ -113,7 +113,7 @@ func (server *ResourceMonitorServer) StartService() {
 					log.Printf("Could not convert data input to bytes")
 				}
 				resourceData := &any.Any{
-					TypeUrl: "anyResourceData",
+					TypeUrl: "anyResourceData_cpu",
 					Value:   byteData,
 				}
 				err = sub.stream.Send(&pb.Response{
@@ -134,7 +134,7 @@ func (server *ResourceMonitorServer) StartService() {
 					log.Printf("Could not convert data input to bytes")
 				}
 				resourceData := &any.Any{
-					TypeUrl: "anyResourceData",
+					TypeUrl: "anyResourceData_memory",
 					Value:   byteData,
 				}
 				err = sub.stream.Send(&pb.Response{
