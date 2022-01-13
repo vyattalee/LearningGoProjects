@@ -108,6 +108,20 @@ func (resourceMonitorClient *ResourceMonitorClient) Start() {
 		//case *pb.Test_Name: // u.Name contains the string.
 		//}
 
+		//data := response.AnyResourceData
+		//
+		//switch data := response.AnyResourceData.(type){
+		//case &pb.Response_Cpu:
+		//	data := &pb.Response_Cpu{}
+		//case &pb.Response_Memory:
+		//	data := &pb.Response_Memory{}
+		//}
+
+		//err = response.AnyResourceData.UnmarshalTo(&data)
+		//if err != nil {
+		//	log.Print("Error while unmarshaling the endorsement")
+		//}
+
 		switch response.Resource.(type) {
 		case *pb.Response_Cpu:
 			log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,

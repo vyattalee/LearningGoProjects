@@ -1,8 +1,10 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
+	"github.com/golang/protobuf/ptypes/any"
 	"github.com/shirou/gopsutil/mem"
 	"log"
 	"sync"
@@ -93,10 +95,10 @@ func (server *ResourceMonitorServer) StartService() {
 			//if client id is odd, then send the cpu info to client
 			//if client id is even, then send the memory info to client
 			var err error
-
 			var cpu []*pb.CPU
 			//var memory *pb.Memory
 			//var response *pb.Response
+			var byteData []byte
 
 			if id%2 == 0 {
 				cpu, err = CollectResource()
@@ -105,9 +107,19 @@ func (server *ResourceMonitorServer) StartService() {
 					return false
 				}
 				resource := &pb.Response_Cpu{Cpu: cpu[0]}
+
+				byteData, err = json.Marshal(resource)
+				if err != nil {
+					log.Printf("Could not convert data input to bytes")
+				}
+				resourceData := &any.Any{
+					TypeUrl: "anyResourceData",
+					Value:   byteData,
+				}
 				err = sub.stream.Send(&pb.Response{
-					ResourceData: fmt.Sprintf("data mock for: %d", id),
-					Resource:     resource,
+					ResourceData:    fmt.Sprintf("data mock for: %d", id),
+					Resource:        resource,
+					AnyResourceData: resourceData,
 				})
 
 			} else {
@@ -116,11 +128,26 @@ func (server *ResourceMonitorServer) StartService() {
 				resource := &pb.Response_Memory{
 					Memory: &pb.Memory{Value: val, Unit: unit},
 				}
+
+				byteData, err = json.Marshal(resource)
+				if err != nil {
+					log.Printf("Could not convert data input to bytes")
+				}
+				resourceData := &any.Any{
+					TypeUrl: "anyResourceData",
+					Value:   byteData,
+				}
 				err = sub.stream.Send(&pb.Response{
-					ResourceData: fmt.Sprintf("data mock for: %d", id),
-					Resource:     resource,
+					ResourceData:    fmt.Sprintf("data mock for: %d", id),
+					Resource:        resource,
+					AnyResourceData: resourceData,
 				})
 			}
+
+			//byteData, err := json.Marshal(resource)
+			//if err != nil {
+			//	log.Printf("Could not convert data input to bytes")
+			//}
 
 			//if err = sub.stream.Send(&pb.Response{
 			//	ResourceData: fmt.Sprintf("data mock for: %d", id),

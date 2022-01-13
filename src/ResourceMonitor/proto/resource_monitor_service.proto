@@ -7,7 +7,7 @@ option go_package = ".;pb";
 import "processors_message.proto";
 import "memory_message.proto";
 import "filter_message.proto";
-//import "google/protobuf/any.proto";
+import "google/protobuf/any.proto";
 
 
 message ServiceType{
@@ -26,12 +26,14 @@ message Request{
 
 message Response{
   string resourceData = 1;
-//  google.protobuf.Any resourceData = 1;
-    oneof resource{
+
+  oneof resource{
       CPU cpu = 2;
       GPU gpu = 3;
       Memory memory = 4;
-    }
+    };
+
+  google.protobuf.Any anyResourceData = 5;
 }
 
 service ResourceMonitorService {
