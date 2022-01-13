@@ -102,9 +102,21 @@ func (resourceMonitorClient *ResourceMonitorClient) Start() {
 			// Retry on failure
 			continue
 		}
-		log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,
-			"\r\nresource-->CPU info:", response.GetCpu(),
-			"\r\nresource-->Memory info:", response.GetMemory())
+
+		//switch u := test.Union.(type) {
+		//case *pb.Test_Number: // u.Number contains the number.
+		//case *pb.Test_Name: // u.Name contains the string.
+		//}
+
+		switch response.Resource.(type) {
+		case *pb.Response_Cpu:
+			log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,
+				"\r\nresource-->CPU info:", response.GetCpu())
+		case *pb.Response_Memory:
+			log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,
+				"\r\nresource-->Memory info:", response.GetMemory())
+		}
+
 	}
 }
 

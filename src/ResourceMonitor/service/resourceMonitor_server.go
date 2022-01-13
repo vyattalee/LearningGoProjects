@@ -92,15 +92,19 @@ func (server *ResourceMonitorServer) StartService() {
 
 			//if client id is odd, then send the cpu info to client
 			//if client id is even, then send the memory info to client
-
 			var err error
+
+			var cpu []*pb.CPU
+			//var memory *pb.Memory
+			//var response *pb.Response
+
 			if id%2 == 0 {
-				ci, err := CollectResource()
+				cpu, err = CollectResource()
 				if err != nil {
 
 					return false
 				}
-				resource := &pb.Response_Cpu{Cpu: ci[0]}
+				resource := &pb.Response_Cpu{Cpu: cpu[0]}
 				err = sub.stream.Send(&pb.Response{
 					ResourceData: fmt.Sprintf("data mock for: %d", id),
 					Resource:     resource,
@@ -118,9 +122,11 @@ func (server *ResourceMonitorServer) StartService() {
 				})
 			}
 
-			//if err := sub.stream.Send(&pb.Response{
+			//if err = sub.stream.Send(&pb.Response{
 			//	ResourceData: fmt.Sprintf("data mock for: %d", id),
-			//	Resource: &pb.Response_Cpu{Cpu:ci[0]},
+			//	Resource: func()*pb.{
+			//		return "anonymous stringy\n"
+			//	};},
 			//}); err != nil {
 			if err != nil {
 				//if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
