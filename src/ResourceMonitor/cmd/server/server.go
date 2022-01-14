@@ -36,7 +36,8 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 
 	grpcServer := grpc.NewServer(serverOptions...)
 
-	resourceMonitorServer := &service.ResourceMonitorServer{}
+	resourceMonitorServer := service.NewResourceMonitorServer()
+	//resourceMonitorServer := &service.ResourceMonitorServer{}
 
 	// Register the server
 	pb.RegisterResourceMonitorServiceServer(grpcServer, resourceMonitorServer)

@@ -15,11 +15,12 @@ import (
 type ResourceMonitorServer struct {
 	pb.UnimplementedResourceMonitorServiceServer
 	subscribers sync.Map // subscribers is a concurrent map that holds mapping from a client ID to it's subscriber
+	ticker      *time.Ticker
 }
 
 // NewProcessorsServer returns a new ProcessorsServer
 func NewResourceMonitorServer() *ResourceMonitorServer {
-	return &ResourceMonitorServer{}
+	return &ResourceMonitorServer{ticker: time.NewTicker(5 * time.Second)}
 }
 
 type sub struct {
@@ -69,19 +70,18 @@ func (server *ResourceMonitorServer) StartService() {
 	for {
 		//time.Sleep(time.Second)
 
-		ticker := time.NewTicker(5 * time.Second)
 		quit := make(chan struct{})
 		//waitResponse := make(chan error)
 
 		select {
-		case <-ticker.C:
+		case <-server.ticker.C:
 			// do stuff
 			log.Println("begin to do ticker stuff")
 			server.doTickerJobs(quit)
 
 		case <-quit:
-			ticker.Stop()
-			continue
+			server.ticker.Stop()
+			break
 
 		}
 
@@ -93,11 +93,11 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 	// A list of clients to unsubscribe in case of error
 	var unsubscribe []int32
 	//subsciber length, if subscriber_len is zero, quit chan<- struct{}{} to stop time.Ticker
-	var subscriber_len int = 0
+	//var subscriber_len int = 0
 
 	// Iterate over all subscribers and send data to each client
 	server.subscribers.Range(func(k, v interface{}) bool {
-		subscriber_len++
+
 		id, ok := k.(int32)
 		if !ok {
 			log.Printf("Failed to cast subscriber key: %T", k)
@@ -203,10 +203,6 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 	// Unsubscribe erroneous client streams
 	for _, id := range unsubscribe {
 		server.subscribers.Delete(id)
-	}
-
-	if subscriber_len == 0 {
-		quit <- struct{}{}
 	}
 
 }
