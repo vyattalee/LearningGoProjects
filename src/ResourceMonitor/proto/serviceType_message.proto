@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package LearningGoProjects.ResourceMonitor;
+
+option go_package = ".;pb";
+
+
+message ServiceType{
+  enum T{
+    ProcessorService = 0;
+    MemoryService = 1;
+    StorageService = 2;
+
+  }
+}

@@ -7,21 +7,14 @@ option go_package = ".;pb";
 import "processors_message.proto";
 import "memory_message.proto";
 import "filter_message.proto";
+
 import "google/protobuf/any.proto";
 
 
-message ServiceType{
-  enum T{
-    ProcessorService = 0;
-    MemoryService = 1;
-    StorageService = 2;
-
-  }
-}
 
 message Request{
   int32 id = 1;
-  ServiceType serviceType = 2;
+  Filter filter = 2;
 }
 
 message Response{

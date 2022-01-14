@@ -69,7 +69,7 @@ func (server *ResourceMonitorServer) StartService() {
 	for {
 		//time.Sleep(time.Second)
 
-		ticker := time.NewTicker(10 * time.Second)
+		ticker := time.NewTicker(5 * time.Second)
 		quit := make(chan struct{})
 		//waitResponse := make(chan error)
 
@@ -77,7 +77,7 @@ func (server *ResourceMonitorServer) StartService() {
 		case <-ticker.C:
 			// do stuff
 			log.Println("begin to do ticker stuff")
-			server.doTickerJobs()
+			server.doTickerJobs(quit)
 
 		case <-quit:
 			ticker.Stop()
@@ -88,13 +88,16 @@ func (server *ResourceMonitorServer) StartService() {
 	}
 }
 
-func (server *ResourceMonitorServer) doTickerJobs() {
+func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 
 	// A list of clients to unsubscribe in case of error
 	var unsubscribe []int32
+	//subsciber length, if subscriber_len is zero, quit chan<- struct{}{} to stop time.Ticker
+	var subscriber_len int = 0
 
 	// Iterate over all subscribers and send data to each client
 	server.subscribers.Range(func(k, v interface{}) bool {
+		subscriber_len++
 		id, ok := k.(int32)
 		if !ok {
 			log.Printf("Failed to cast subscriber key: %T", k)
@@ -201,4 +204,9 @@ func (server *ResourceMonitorServer) doTickerJobs() {
 	for _, id := range unsubscribe {
 		server.subscribers.Delete(id)
 	}
+
+	if subscriber_len == 0 {
+		quit <- struct{}{}
+	}
+
 }
