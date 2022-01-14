@@ -67,112 +67,138 @@ func (server *ResourceMonitorServer) Subscribe(
 func (server *ResourceMonitorServer) StartService() {
 	log.Println("Starting resource monitor background service")
 	for {
-		time.Sleep(time.Second)
+		//time.Sleep(time.Second)
 
-		// A list of clients to unsubscribe in case of error
-		var unsubscribe []int32
+		ticker := time.NewTicker(10 * time.Second)
+		quit := make(chan struct{})
+		//waitResponse := make(chan error)
 
-		// Iterate over all subscribers and send data to each client
-		server.subscribers.Range(func(k, v interface{}) bool {
-			id, ok := k.(int32)
-			if !ok {
-				log.Printf("Failed to cast subscriber key: %T", k)
-				return false
-			}
-			sub, ok := v.(sub)
-			if !ok {
-				log.Printf("Failed to cast subscriber value: %T", v)
-				return false
-			}
-			// Send data over the gRPC stream to the client
-			//s1 := fmt.Sprintf("data mock for: %d", id)
+		select {
+		case <-ticker.C:
+			// do stuff
+			log.Println("begin to do ticker stuff")
+			server.doTickerJobs()
 
-			//anydata, err := anypb.New(wrapperspb.String(fmt.Sprintf("data mock for: %d", id)))
-			//if err != nil {
-			//	log.Fatal("could not An constructe any message containing another message value") // handle error
-			//}
+		case <-quit:
+			ticker.Stop()
+			continue
 
-			//if client id is odd, then send the cpu info to client
-			//if client id is even, then send the memory info to client
-			var err error
-			var cpu []*pb.CPU
-			//var memory *pb.Memory
-			//var response *pb.Response
-			var byteData []byte
-
-			if id%2 == 0 {
-				cpu, err = CollectResource()
-				if err != nil {
-
-					return false
-				}
-				resource := &pb.Response_Cpu{Cpu: cpu[0]}
-
-				byteData, err = json.Marshal(resource)
-				if err != nil {
-					log.Printf("Could not convert data input to bytes")
-				}
-				resourceData := &any.Any{
-					TypeUrl: "anyResourceData_cpu",
-					Value:   byteData,
-				}
-				err = sub.stream.Send(&pb.Response{
-					ResourceData:    fmt.Sprintf("data mock for: %d", id),
-					Resource:        resource,
-					AnyResourceData: resourceData,
-				})
-
-			} else {
-				info, _ := mem.VirtualMemory()
-				val, unit := ConvertMemory(info.Total)
-				resource := &pb.Response_Memory{
-					Memory: &pb.Memory{Value: val, Unit: unit},
-				}
-
-				byteData, err = json.Marshal(resource)
-				if err != nil {
-					log.Printf("Could not convert data input to bytes")
-				}
-				resourceData := &any.Any{
-					TypeUrl: "anyResourceData_memory",
-					Value:   byteData,
-				}
-				err = sub.stream.Send(&pb.Response{
-					ResourceData:    fmt.Sprintf("data mock for: %d", id),
-					Resource:        resource,
-					AnyResourceData: resourceData,
-				})
-			}
-
-			//byteData, err := json.Marshal(resource)
-			//if err != nil {
-			//	log.Printf("Could not convert data input to bytes")
-			//}
-
-			//if err = sub.stream.Send(&pb.Response{
-			//	ResourceData: fmt.Sprintf("data mock for: %d", id),
-			//	Resource: func()*pb.{
-			//		return "anonymous stringy\n"
-			//	};},
-			//}); err != nil {
-			if err != nil {
-				//if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
-				log.Printf("Failed to send data to client: %v", err)
-				select {
-				case sub.finished <- true:
-					log.Printf("Unsubscribed client: %d", id)
-				default:
-					// Default case is to avoid blocking in case client has already unsubscribed
-				}
-				// In case of error the client would re-subscribe so close the subscriber stream
-				unsubscribe = append(unsubscribe, id)
-			}
-			return true
-		})
-
-		// Unsubscribe erroneous client streams
-		for _, id := range unsubscribe {
-			server.subscribers.Delete(id)
 		}
+
+	}
+}
+
+func (server *ResourceMonitorServer) doTickerJobs() {
+
+	// A list of clients to unsubscribe in case of error
+	var unsubscribe []int32
+
+	// Iterate over all subscribers and send data to each client
+	server.subscribers.Range(func(k, v interface{}) bool {
+		id, ok := k.(int32)
+		if !ok {
+			log.Printf("Failed to cast subscriber key: %T", k)
+			return false
+		}
+		sub, ok := v.(sub)
+		if !ok {
+			log.Printf("Failed to cast subscriber value: %T", v)
+			return false
+		}
+		// Send data over the gRPC stream to the client
+		//s1 := fmt.Sprintf("data mock for: %d", id)
+
+		//anydata, err := anypb.New(wrapperspb.String(fmt.Sprintf("data mock for: %d", id)))
+		//if err != nil {
+		//	log.Fatal("could not An constructe any message containing another message value") // handle error
+		//}
+
+		//if client id is odd, then send the cpu info to client
+		//if client id is even, then send the memory info to client
+		var err error
+		var cpu []*pb.CPU
+		//var memory *pb.Memory
+		//var response *pb.Response
+		var byteData []byte
+
+		if id%2 == 0 {
+			cpu, err = CollectResource()
+			if err != nil {
+
+				return false
+			}
+			resource := &pb.Response_Cpu{Cpu: cpu[0]}
+
+			byteData, err = json.Marshal(resource)
+			if err != nil {
+				log.Printf("Could not convert data input to bytes")
+			}
+			resourceData := &any.Any{
+				TypeUrl: "anyResourceData_cpu",
+				Value:   byteData,
+			}
+			err = sub.stream.Send(&pb.Response{
+				ResourceData:    fmt.Sprintf("data mock for: %d", id),
+				Resource:        resource,
+				AnyResourceData: resourceData,
+			})
+			//
+			//err = sub.stream.Send(&pb.Response{
+			//	ResourceData:    fmt.Sprintf("data repeated send for: %d", id),
+			//	Resource:        resource,
+			//	AnyResourceData: resourceData,
+			//})
+
+		} else {
+			info, _ := mem.VirtualMemory()
+			val, unit := ConvertMemory(info.Total)
+			resource := &pb.Response_Memory{
+				Memory: &pb.Memory{Value: val, Unit: unit},
+			}
+
+			byteData, err = json.Marshal(resource)
+			if err != nil {
+				log.Printf("Could not convert data input to bytes")
+			}
+			resourceData := &any.Any{
+				TypeUrl: "anyResourceData_memory",
+				Value:   byteData,
+			}
+			err = sub.stream.Send(&pb.Response{
+				ResourceData:    fmt.Sprintf("data mock for: %d", id),
+				Resource:        resource,
+				AnyResourceData: resourceData,
+			})
+		}
+
+		//byteData, err := json.Marshal(resource)
+		//if err != nil {
+		//	log.Printf("Could not convert data input to bytes")
+		//}
+
+		//if err = sub.stream.Send(&pb.Response{
+		//	ResourceData: fmt.Sprintf("data mock for: %d", id),
+		//	Resource: func()*pb.{
+		//		return "anonymous stringy\n"
+		//	};},
+		//}); err != nil {
+		if err != nil {
+			//if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
+			log.Printf("Failed to send data to client: %v", err)
+			select {
+			case sub.finished <- true:
+				log.Printf("Unsubscribed client: %d", id)
+			default:
+				// Default case is to avoid blocking in case client has already unsubscribed
+			}
+			// In case of error the client would re-subscribe so close the subscriber stream
+			unsubscribe = append(unsubscribe, id)
+		}
+		return true
+	})
+
+	// Unsubscribe erroneous client streams
+	for _, id := range unsubscribe {
+		server.subscribers.Delete(id)
 	}
 }
