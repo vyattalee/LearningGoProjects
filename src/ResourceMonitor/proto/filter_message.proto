@@ -4,11 +4,11 @@ package LearningGoProjects.ResourceMonitor;
 
 option go_package = ".;pb";
 
-import "serviceType_message.proto";
+//import "serviceType_message.proto";
 
 message Filter {
   int32 sampling_period = 1; //unit second
-  ServiceType serviceType = 2;
+  bytes sub_service = 2;
 
 
 }

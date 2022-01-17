@@ -24,8 +24,9 @@ func NewResourceMonitorServer() *ResourceMonitorServer {
 }
 
 type sub struct {
-	stream   pb.ResourceMonitorService_SubscribeServer // stream is the server side of the RPC stream
-	finished chan<- bool                               // finished is used to signal closure of a client subscribing goroutine
+	stream       pb.ResourceMonitorService_SubscribeServer // stream is the server side of the RPC stream
+	finished     chan<- bool                               // finished is used to signal closure of a client subscribing goroutine
+	sub_services []byte                                    //utils.BitMap
 }
 
 func (server *ResourceMonitorServer) Subscribe(
@@ -48,7 +49,7 @@ func (server *ResourceMonitorServer) Subscribe(
 
 	fin := make(chan bool)
 	// Save the subscriber stream according to the given client ID
-	server.subscribers.Store(req.Id, sub{stream: stream, finished: fin})
+	server.subscribers.Store(req.Id, sub{stream: stream, finished: fin, sub_services: req.Filter.SubService})
 
 	ctx := stream.Context()
 	// Keep this scope alive because once this scope exits - the stream is closed
@@ -117,6 +118,7 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 		//var response *pb.Response
 		var byteData []byte
 
+		log.Println("$$$$$$$$$$$$$sub_service:", sub.sub_services)
 		if id%2 == 0 {
 			cpu, err = CollectResource()
 			if err != nil {

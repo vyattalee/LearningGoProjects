@@ -36,7 +36,7 @@ func main() {
 			log.Fatal(err)
 		}
 		// Dispatch client goroutine
-		go client.Start()
+		go client.Start("processor")
 		time.Sleep(time.Second * 2)
 	}
 

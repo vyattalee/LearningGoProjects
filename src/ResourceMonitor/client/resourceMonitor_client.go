@@ -3,75 +3,35 @@ package client
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
+	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
-	"io"
 	"log"
 	"time"
 )
 
 // ResourceMonitorClient is a client to call processors service RPCs
 type ResourceMonitorClient struct {
-	service pb.ResourceMonitorServiceClient
-	conn    *grpc.ClientConn // conn is the client gRPC connection
-	id      int32            // id is the client ID used for subscribing
+	service      pb.ResourceMonitorServiceClient
+	conn         *grpc.ClientConn // conn is the client gRPC connection
+	id           int32            // id is the client ID used for subscribing
+	sub_services *utils.BitMap
 }
 
 // NewResourceMonitorClient returns a new processors client
 func NewResourceMonitorClient(id int32, cc *grpc.ClientConn) *ResourceMonitorClient {
 	service := pb.NewResourceMonitorServiceClient(cc)
-	return &ResourceMonitorClient{service: service, id: id}
+	return &ResourceMonitorClient{service: service, id: id, sub_services: utils.NewBitMap(8)}
 }
 
-// ProcessorsClient calls SubscribeProcessorInfo RPC
-func (resourceMonitorClient *ResourceMonitorClient) Subscribe_OLD() error {
-	req := &pb.Request{}
-
-	ctx := context.Background()
-
-	log.Println("resourceMonitorClient.service.Subscribe(ctx, req)")
-
-	stream, err := resourceMonitorClient.service.Subscribe(ctx, req)
-	if err != nil {
-		return fmt.Errorf("cannot subscrible processor: %v", err)
-	}
-
-	waitResponse := make(chan error)
-	// go routine to receive responses
-	go func() {
-		log.Println("processors client go routine")
-		for {
-			res, err := stream.Recv()
-			if err == io.EOF {
-				log.Print("no more responses")
-				waitResponse <- nil
-				return
-			}
-			if err != nil {
-				stream.CloseSend()
-
-				waitResponse <- fmt.Errorf("cannot receive stream response: %v", err)
-				return
-			}
-
-			log.Println("received resourceMonitorClient.service.Subscribe response: ", res.ResourceData, stream.RecvMsg(nil))
-		}
-	}()
-
-	err = <-waitResponse
-	log.Println("err = <-waitResponse", err)
-	return err
-}
-
-func (resourceMonitorClient *ResourceMonitorClient) Start() {
+func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string) {
 	var err error
 	// stream is the client side of the RPC stream
 	var stream pb.ResourceMonitorService_SubscribeClient
 	for {
 		if stream == nil {
-			if stream, err = resourceMonitorClient.subscribe(); err != nil {
+			if stream, err = resourceMonitorClient.subscribe(sub_services...); err != nil {
 				log.Printf("Failed to subscribe: %v", err)
 				resourceMonitorClient.sleep()
 				// Retry on failure
@@ -131,9 +91,17 @@ func (resourceMonitorClient *ResourceMonitorClient) Start() {
 }
 
 // subscribe subscribes to messages from the gRPC server
-func (resourceMonitorClient *ResourceMonitorClient) subscribe() (pb.ResourceMonitorService_SubscribeClient, error) {
+func (resourceMonitorClient *ResourceMonitorClient) subscribe(sub_services ...string) (pb.ResourceMonitorService_SubscribeClient, error) {
 	log.Printf("Subscribing client ID: %d", resourceMonitorClient.id)
-	return resourceMonitorClient.service.Subscribe(context.Background(), &pb.Request{Id: resourceMonitorClient.id}) //, Filter: &pb.Filter{ServiceType: &pb.ServiceType.ProcessorService}
+	for _, sub_service := range sub_services {
+		if sub_service == "processor" {
+			resourceMonitorClient.sub_services.Add(1 << pb.ServiceType_ProcessorService)
+		} else if sub_service == "memory" {
+			resourceMonitorClient.sub_services.Add(1 << pb.ServiceType_MemoryService)
+		}
+	}
+	return resourceMonitorClient.service.Subscribe(context.Background(),
+		&pb.Request{Id: resourceMonitorClient.id, Filter: &pb.Filter{SubService: resourceMonitorClient.sub_services.Byte()}}) //, Filter: &pb.Filter{ServiceType: &pb.ServiceType.ProcessorService}
 }
 
 // sleep is used to give the server time to unsubscribe the client and reset the stream
@@ -152,9 +120,10 @@ func MKResourceMonitorClient(id int32, target string, opts ...grpc.DialOption) (
 		return nil, err
 	}
 	return &ResourceMonitorClient{
-		service: pb.NewResourceMonitorServiceClient(conn),
-		conn:    conn,
-		id:      id,
+		service:      pb.NewResourceMonitorServiceClient(conn),
+		conn:         conn,
+		id:           id,
+		sub_services: utils.NewBitMap(8),
 	}, nil
 }
 
@@ -199,9 +168,10 @@ func MKResourceMonitorInterceptorClient(id int32, target string, opts ...grpc.Di
 	}
 
 	return &ResourceMonitorClient{
-		service: pb.NewResourceMonitorServiceClient(conn2),
-		conn:    conn2,
-		id:      id,
+		service:      pb.NewResourceMonitorServiceClient(conn2),
+		conn:         conn2,
+		id:           id,
+		sub_services: utils.NewBitMap(8),
 	}, nil
 }
 
