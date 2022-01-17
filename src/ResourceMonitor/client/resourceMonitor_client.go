@@ -133,7 +133,7 @@ func (resourceMonitorClient *ResourceMonitorClient) Start() {
 // subscribe subscribes to messages from the gRPC server
 func (resourceMonitorClient *ResourceMonitorClient) subscribe() (pb.ResourceMonitorService_SubscribeClient, error) {
 	log.Printf("Subscribing client ID: %d", resourceMonitorClient.id)
-	return resourceMonitorClient.service.Subscribe(context.Background(), &pb.Request{Id: resourceMonitorClient.id})
+	return resourceMonitorClient.service.Subscribe(context.Background(), &pb.Request{Id: resourceMonitorClient.id}) //, Filter: &pb.Filter{ServiceType: &pb.ServiceType.ProcessorService}
 }
 
 // sleep is used to give the server time to unsubscribe the client and reset the stream
