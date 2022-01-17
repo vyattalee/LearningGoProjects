@@ -168,7 +168,7 @@ func authMethods() map[string]bool {
 	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService/"
 
 	return map[string]bool{
-		resourceMonitorServicePath + "Subscribe":   true,
+		//resourceMonitorServicePath + "Subscribe":   true,
 		resourceMonitorServicePath + "Unsubscribe": true,
 	}
 }

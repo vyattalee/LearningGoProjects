@@ -28,7 +28,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	for i := 1; i <= 5; i++ {
+	for i := 1; i <= 1; i++ {
 		wg.Add(1)
 		client, err := client.MKResourceMonitorInterceptorClient(int32(i), *serverAddress, transportOption)
 		//client, err := client.MKResourceMonitorClient(int32(i), *serverAddress, transportOption)

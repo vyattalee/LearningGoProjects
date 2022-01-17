@@ -8,6 +8,7 @@ import (
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 	"net/http"
@@ -51,12 +52,12 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 	// Register the server
 	pb.RegisterAuthServiceServer(grpcServer, authServer)
 	pb.RegisterResourceMonitorServiceServer(grpcServer, resourceMonitorServer)
+	pb.RegisterProcessorsServiceServer(grpcServer, processorsServer)
+	//pb.RegisterMemoryServiceServer(grpcServer, memoryServer)
+	reflection.Register(grpcServer)
 
 	// Start sending data to subscribers
 	go resourceMonitorServer.StartService()
-
-	pb.RegisterProcessorsServiceServer(grpcServer, processorsServer)
-	//pb.RegisterMemoryServiceServer(grpcServer, memoryServer)
 
 	log.Printf("Start GRPC server at %s, TLS = %t", listener.Addr().String(), enableTLS)
 	return grpcServer.Serve(listener)
