@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
 	"github.com/LearningGoProjects/ResourceMonitor/service"
+	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 	"log"
@@ -36,10 +37,19 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 
 	grpcServer := grpc.NewServer(serverOptions...)
 
+	userStore := service.NewInMemoryUserStore()
+	err := seedUsers(userStore)
+	if err != nil {
+		log.Fatal("cannot seed users: ", err)
+	}
+
+	jwtManager := service.NewJWTManager(utils.SecretKey, utils.TokenDuration)
+	authServer := service.NewAuthServer(userStore, jwtManager)
+
 	resourceMonitorServer := service.NewResourceMonitorServer()
-	//resourceMonitorServer := &service.ResourceMonitorServer{}
 
 	// Register the server
+	pb.RegisterAuthServiceServer(grpcServer, authServer)
 	pb.RegisterResourceMonitorServiceServer(grpcServer, resourceMonitorServer)
 
 	// Start sending data to subscribers
@@ -96,4 +106,20 @@ func main() {
 		log.Fatal("cannot start server: ", err)
 	}
 
+}
+
+func seedUsers(userStore service.UserStore) error {
+	err := createUser(userStore, "admin1", "secret", "admin")
+	if err != nil {
+		return err
+	}
+	return createUser(userStore, "user1", "secret", "user")
+}
+
+func createUser(userStore service.UserStore, username, password, role string) error {
+	user, err := service.NewUser(username, password, role)
+	if err != nil {
+		return err
+	}
+	return userStore.Save(user)
 }

@@ -30,7 +30,8 @@ func main() {
 
 	for i := 1; i <= 5; i++ {
 		wg.Add(1)
-		client, err := client.MKResourceMonitorClient(int32(i), *serverAddress, transportOption)
+		client, err := client.MKResourceMonitorInterceptorClient(int32(i), *serverAddress, transportOption)
+		//client, err := client.MKResourceMonitorClient(int32(i), *serverAddress, transportOption)
 		if err != nil {
 			log.Fatal(err)
 		}

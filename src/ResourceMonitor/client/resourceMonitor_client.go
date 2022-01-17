@@ -158,6 +158,53 @@ func MKResourceMonitorClient(id int32, target string, opts ...grpc.DialOption) (
 	}, nil
 }
 
+const (
+	username        = "admin1"
+	password        = "secret"
+	refreshDuration = 30 * time.Second
+)
+
+func authMethods() map[string]bool {
+	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService/"
+
+	return map[string]bool{
+		resourceMonitorServicePath + "Subscribe":   true,
+		resourceMonitorServicePath + "Unsubscribe": true,
+	}
+}
+
+// MKResourceMonitorClient creates a new client instance
+func MKResourceMonitorInterceptorClient(id int32, target string, opts ...grpc.DialOption) (*ResourceMonitorClient, error) {
+	conn, err := mkConnection(target, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	authClient := NewAuthClient(conn, username, password)
+	interceptor, err := NewAuthInterceptor(authClient, authMethods(), refreshDuration)
+	if err != nil {
+		log.Fatal("cannot create auth interceptor: ", err)
+	}
+
+	transportOption := grpc.WithInsecure()
+
+	conn2, err := grpc.Dial(
+		target,
+		transportOption,
+		grpc.WithUnaryInterceptor(interceptor.Unary()),
+		grpc.WithStreamInterceptor(interceptor.Stream()),
+	)
+	if err != nil {
+		log.Fatal("cannot dial server: ", err)
+	}
+
+	return &ResourceMonitorClient{
+		service: pb.NewResourceMonitorServiceClient(conn2),
+		conn:    conn2,
+		id:      id,
+	}, nil
+}
+
 // close is not used but is here as an example of how to close the gRPC client connection
 func (resourceMonitorClient *ResourceMonitorClient) close() {
 	if err := resourceMonitorClient.conn.Close(); err != nil {
