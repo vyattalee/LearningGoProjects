@@ -56,23 +56,6 @@ func (resourceMonitorClient *ResourceMonitorClient) Subscribe_OLD() error {
 				return
 			}
 
-			// unmarshal to simulate coming off the wire
-			//m := proto.Message
-			//err := res.ResourceData.UnmarshalTo(m)
-			//if err != nil {
-			//	log.Fatal("could not unmarshal the contents into a new instance of the remote message type") // handle error
-			//}
-			//a := wrapperspb.String("")
-			//serializedA, err := proto.Marshal(a)
-			//if err != nil {
-			//	log.Fatal("could not serialize anything")
-			//}
-			//
-			//// unmarshal to simulate coming off the wire
-			//var a2 pb.Response
-			//if err := proto.Unmarshal(res, &a2); err != nil {
-			//	log.Fatal("could not deserialize anything")
-			//}
 			log.Println("received resourceMonitorClient.service.Subscribe response: ", res.ResourceData, stream.RecvMsg(nil))
 		}
 	}()
@@ -105,12 +88,6 @@ func (resourceMonitorClient *ResourceMonitorClient) Start() {
 			continue
 		}
 
-		//switch u := test.Union.(type) {
-		//case *pb.Test_Number: // u.Number contains the number.
-		//case *pb.Test_Name: // u.Name contains the string.
-		//}
-
-		//data := response.AnyResourceData
 		//
 		//switch data := response.AnyResourceData.(type){
 		//case &pb.Response_Cpu:
@@ -131,8 +108,6 @@ func (resourceMonitorClient *ResourceMonitorClient) Start() {
 		//	log.Print("Error while unmarshaling the endorsement")
 		//}
 
-		//unmarshal_cpu := &pb.Response_Cpu{}
-		//unmarshal_memory := &pb.Response_Memory{}
 		//TypeUrl can be used for select which kind of anyResourceData type.
 		unmarshal := &pb.Response{}
 		switch response.AnyResourceData.GetTypeUrl() {

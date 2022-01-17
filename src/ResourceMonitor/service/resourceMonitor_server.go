@@ -108,13 +108,6 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 			log.Printf("Failed to cast subscriber value: %T", v)
 			return false
 		}
-		// Send data over the gRPC stream to the client
-		//s1 := fmt.Sprintf("data mock for: %d", id)
-
-		//anydata, err := anypb.New(wrapperspb.String(fmt.Sprintf("data mock for: %d", id)))
-		//if err != nil {
-		//	log.Fatal("could not An constructe any message containing another message value") // handle error
-		//}
 
 		//if client id is odd, then send the cpu info to client
 		//if client id is even, then send the memory info to client
@@ -145,12 +138,6 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 				Resource:        resource,
 				AnyResourceData: resourceData,
 			})
-			//
-			//err = sub.stream.Send(&pb.Response{
-			//	ResourceData:    fmt.Sprintf("data repeated send for: %d", id),
-			//	Resource:        resource,
-			//	AnyResourceData: resourceData,
-			//})
 
 		} else {
 			info, _ := mem.VirtualMemory()
@@ -173,12 +160,7 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 				AnyResourceData: resourceData,
 			})
 		}
-
-		//byteData, err := json.Marshal(resource)
-		//if err != nil {
-		//	log.Printf("Could not convert data input to bytes")
-		//}
-
+		//whether Can it be integrated into the following single function
 		//if err = sub.stream.Send(&pb.Response{
 		//	ResourceData: fmt.Sprintf("data mock for: %d", id),
 		//	Resource: func()*pb.{
