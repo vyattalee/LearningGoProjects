@@ -44,20 +44,20 @@ func main() {
 		go clientX.Start(services[:((i-1)%len(services) + 1)]...)
 
 		time.Sleep(time.Second * 2)
+
 	}
-
-	time.Sleep(time.Second * 30)
-
-	for i := 3; i <= 5; i++ {
-		wg.Add(1)
-		cl, err := client.MKResourceMonitorInterceptorClient(int32(i), *serverAddress, transportOption)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		cl.Stop()
-	}
+	//time.Sleep(time.Second * 30)
+	//
+	//for i := 3; i <= 5; i++ {
+	//	wg.Add(1)
+	//	cl, err := client.MKResourceMonitorInterceptorClient(int32(i), *serverAddress, transportOption)
+	//
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//
+	//	cl.Stop()
+	//}
 
 	// The wait group purpose is to avoid exiting, the clients do not exit
 	wg.Wait()
