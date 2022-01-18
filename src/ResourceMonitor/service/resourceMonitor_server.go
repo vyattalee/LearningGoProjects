@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
+	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/shirou/gopsutil/mem"
 	"log"
@@ -26,7 +27,7 @@ func NewResourceMonitorServer() *ResourceMonitorServer {
 type sub struct {
 	stream       pb.ResourceMonitorService_SubscribeServer // stream is the server side of the RPC stream
 	finished     chan<- bool                               // finished is used to signal closure of a client subscribing goroutine
-	sub_services []byte                                    //utils.BitMap
+	sub_services *utils.BitMap                             //utils.BitMap
 }
 
 func (server *ResourceMonitorServer) Subscribe(
@@ -34,22 +35,12 @@ func (server *ResourceMonitorServer) Subscribe(
 	stream pb.ResourceMonitorService_SubscribeServer,
 ) error {
 
-	//switch req.GetServiceType() {
-	//case pb.ServiceType_ProcessorService.Enum():
-	//	//
-	//	log.Println("Subscribe processor service")
-	//
-	//case pb.ServiceType_MemoryService.Enum():
-	//	log.Println("Subscribe memory service")
-	//
-	//}
-
 	// Handle subscribe request
 	log.Printf("Received subscribe request from ID: %d", req.Id)
 
 	fin := make(chan bool)
 	// Save the subscriber stream according to the given client ID
-	server.subscribers.Store(req.Id, sub{stream: stream, finished: fin, sub_services: req.Filter.SubService})
+	server.subscribers.Store(req.Id, sub{stream: stream, finished: fin, sub_services: utils.NewBitMapFromBytes(req.Filter.SubService)})
 
 	ctx := stream.Context()
 	// Keep this scope alive because once this scope exits - the stream is closed
@@ -118,8 +109,8 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 		//var response *pb.Response
 		var byteData []byte
 
-		log.Println("$$$$$$$$$$$$$sub_service:", sub.sub_services)
-		if id%2 == 0 {
+		log.Println("$$$$$$$$$$$$$client:", id, "	subscribe services:", sub.sub_services.String())
+		if sub.sub_services.Bit(1<<pb.ServiceType_ProcessorService-1) == utils.IsSet {
 			cpu, err = CollectResource()
 			if err != nil {
 
@@ -141,7 +132,7 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 				AnyResourceData: resourceData,
 			})
 
-		} else {
+		} else if sub.sub_services.Bit(1<<pb.ServiceType_MemoryService-1) == utils.IsSet {
 			info, _ := mem.VirtualMemory()
 			val, unit := ConvertMemory(info.Total)
 			resource := &pb.Response_Memory{
@@ -162,6 +153,9 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 				AnyResourceData: resourceData,
 			})
 		}
+		//else {
+		//	log.Printf("not support resource service type: ", sub.sub_services.Xor(utils.NewBitMapFromString("11")))
+		//}
 		//whether Can it be integrated into the following single function
 		//if err = sub.stream.Send(&pb.Response{
 		//	ResourceData: fmt.Sprintf("data mock for: %d", id),

@@ -95,13 +95,15 @@ func (resourceMonitorClient *ResourceMonitorClient) subscribe(sub_services ...st
 	log.Printf("Subscribing client ID: %d", resourceMonitorClient.id)
 	for _, sub_service := range sub_services {
 		if sub_service == "processor" {
-			resourceMonitorClient.sub_services.Add(1 << pb.ServiceType_ProcessorService)
+			resourceMonitorClient.sub_services.Set((1 << pb.ServiceType_ProcessorService) - 1)
 		} else if sub_service == "memory" {
-			resourceMonitorClient.sub_services.Add(1 << pb.ServiceType_MemoryService)
+			resourceMonitorClient.sub_services.Set((1 << pb.ServiceType_MemoryService) - 1)
+		} else if sub_service == "storage" {
+			resourceMonitorClient.sub_services.Set((1 << pb.ServiceType_StorageService) - 1)
 		}
 	}
 	return resourceMonitorClient.service.Subscribe(context.Background(),
-		&pb.Request{Id: resourceMonitorClient.id, Filter: &pb.Filter{SubService: resourceMonitorClient.sub_services.Byte()}}) //, Filter: &pb.Filter{ServiceType: &pb.ServiceType.ProcessorService}
+		&pb.Request{Id: resourceMonitorClient.id, Filter: &pb.Filter{SubService: resourceMonitorClient.sub_services.Bytes()}}) //, Filter: &pb.Filter{ServiceType: &pb.ServiceType.ProcessorService}
 }
 
 // sleep is used to give the server time to unsubscribe the client and reset the stream

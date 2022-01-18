@@ -36,7 +36,10 @@ func main() {
 			log.Fatal(err)
 		}
 		// Dispatch client goroutine
-		go client.Start("processor")
+		services := []string{"processor", "memory", "storage"}
+
+		go client.Start(services[(i-1)%len(services)])
+
 		time.Sleep(time.Second * 2)
 	}
 
