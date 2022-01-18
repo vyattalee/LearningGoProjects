@@ -31,19 +31,32 @@ func main() {
 
 	for i := 1; i <= 5; i++ {
 		wg.Add(1)
-		client, err := client.MKResourceMonitorInterceptorClient(int32(i), *serverAddress, transportOption)
-		//client, err := client.MKResourceMonitorClient(int32(i), *serverAddress, transportOption)
+		clientX, err := client.MKResourceMonitorInterceptorClient(int32(i), *serverAddress, transportOption)
+		//clientX, err := clientX.MKResourceMonitorClient(int32(i), *serverAddress, transportOption)
 		if err != nil {
 			log.Fatal(err)
 		}
-		// Dispatch client goroutine
+		// Dispatch clientX goroutine
 		services := []string{"processor", "memory", "storage"}
 		log.Println("%%%%%%%%%%%%%%%%", strings.Join(services[:((i-1)%len(services)+1)], ","))
 
-		//go client.Start(strings.Join(services[:((i-1)%len(services)+1)],","))
-		go client.Start(services[:((i-1)%len(services) + 1)]...)
+		//go clientX.Start(strings.Join(services[:((i-1)%len(services)+1)],","))
+		go clientX.Start(services[:((i-1)%len(services) + 1)]...)
 
 		time.Sleep(time.Second * 2)
+	}
+
+	time.Sleep(time.Second * 30)
+
+	for i := 3; i <= 5; i++ {
+		wg.Add(1)
+		cl, err := client.MKResourceMonitorInterceptorClient(int32(i), *serverAddress, transportOption)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		cl.Stop()
 	}
 
 	// The wait group purpose is to avoid exiting, the clients do not exit

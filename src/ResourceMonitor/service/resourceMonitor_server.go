@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
@@ -57,6 +58,27 @@ func (server *ResourceMonitorServer) Subscribe(
 
 }
 
+// Unsubscribe handles a unsubscribe request from a client
+// Note: this function is not called but it here as an example of an unary RPC for unsubscribing clients
+func (server *ResourceMonitorServer) Unsubscribe(ctx context.Context, request *pb.Request) (*pb.Response, error) {
+	v, ok := server.subscribers.Load(request.Id)
+	if !ok {
+		return nil, fmt.Errorf("failed to load subscriber key: %d", request.Id)
+	}
+	sub, ok := v.(sub)
+	if !ok {
+		return nil, fmt.Errorf("failed to cast subscriber value: %T", v)
+	}
+	select {
+	case sub.finished <- true:
+		log.Printf("Unsubscribed client: %d", request.Id)
+	default:
+		// Default case is to avoid blocking in case client has already unsubscribed
+	}
+	server.subscribers.Delete(request.Id)
+	return &pb.Response{}, nil
+}
+
 func (server *ResourceMonitorServer) StartService() {
 	log.Println("Starting resource monitor background service")
 	for {
@@ -107,8 +129,10 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 
 		log.Println("$$$$$$$$$$$$$client:", id, "	subscribe services:", sub.sub_services.String())
 
-		switch {
-		case sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet:
+		//switch {
+		//case sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet:
+		if sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet {
+
 			log.Println("sub.sub_services.Bit(int(pb.ServiceType_ProcessorService))")
 			cpu, err = CollectResource()
 			if err != nil {
@@ -130,8 +154,11 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 				Resource:        resource,
 				AnyResourceData: resourceData,
 			})
-			fallthrough
-		case sub.sub_services.Bit(int(pb.ServiceType_MemoryService)) == utils.IsSet:
+			//fallthrough
+		}
+
+		//case sub.sub_services.Bit(int(pb.ServiceType_MemoryService)) == utils.IsSet:
+		if sub.sub_services.Bit(int(pb.ServiceType_MemoryService)) == utils.IsSet {
 			log.Println("sub.sub_services.Bit(int(pb.ServiceType_MemoryService))")
 			info, _ := mem.VirtualMemory()
 			val, unit := ConvertMemory(info.Total)
@@ -152,12 +179,17 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 				Resource:        resource,
 				AnyResourceData: resourceData,
 			})
-			fallthrough
-		default:
+			//fallthrough
+		}
+
+		//case sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet:
+		if sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet {
+			//default:
 			log.Printf("Now NOT support resource service type: ",
 				sub.sub_services) //.Xor(utils.NewBitMapFromString("11000000"))
-
 		}
+
+		//}  //end of switch
 
 		//whether Can it be integrated into the following single function
 		//if err = sub.stream.Send(&pb.Response{

@@ -96,6 +96,23 @@ func (resourceMonitorClient *ResourceMonitorClient) subscribe(sub_services ...st
 		&pb.Request{Id: resourceMonitorClient.id, Filter: &pb.Filter{SubService: resourceMonitorClient.sub_services.Bytes()}}) //, Filter: &pb.Filter{ServiceType: &pb.ServiceType.ProcessorService}
 }
 
+func (resourceMonitorClient *ResourceMonitorClient) Stop(sub_services ...string) {
+	var err error
+
+	if err = resourceMonitorClient.unsubscribe(sub_services...); err != nil {
+		log.Printf("Failed to unsubscribe: %v", err)
+		// Retry on failure
+	}
+	resourceMonitorClient.close()
+}
+
+// unsubscribe unsubscribes to messages from the gRPC server
+func (resourceMonitorClient *ResourceMonitorClient) unsubscribe(sub_services ...string) error {
+	log.Printf("Unsubscribing client ID %d", resourceMonitorClient.id)
+	_, err := resourceMonitorClient.service.Unsubscribe(context.Background(), &pb.Request{Id: resourceMonitorClient.id})
+	return err
+}
+
 // sleep is used to give the server time to unsubscribe the client and reset the stream
 func (resourceMonitorClient *ResourceMonitorClient) sleep() {
 	time.Sleep(time.Second * 5)
