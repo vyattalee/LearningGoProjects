@@ -101,16 +101,15 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 			return false
 		}
 
-		//if client id is odd, then send the cpu info to client
-		//if client id is even, then send the memory info to client
 		var err error
 		var cpu []*pb.CPU
-		//var memory *pb.Memory
-		//var response *pb.Response
 		var byteData []byte
 
 		log.Println("$$$$$$$$$$$$$client:", id, "	subscribe services:", sub.sub_services.String())
-		if sub.sub_services.Bit(1<<pb.ServiceType_ProcessorService-1) == utils.IsSet {
+
+		switch {
+		case sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet:
+			log.Println("sub.sub_services.Bit(int(pb.ServiceType_ProcessorService))")
 			cpu, err = CollectResource()
 			if err != nil {
 
@@ -131,8 +130,9 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 				Resource:        resource,
 				AnyResourceData: resourceData,
 			})
-
-		} else if sub.sub_services.Bit(1<<pb.ServiceType_MemoryService-1) == utils.IsSet {
+			fallthrough
+		case sub.sub_services.Bit(int(pb.ServiceType_MemoryService)) == utils.IsSet:
+			log.Println("sub.sub_services.Bit(int(pb.ServiceType_MemoryService))")
 			info, _ := mem.VirtualMemory()
 			val, unit := ConvertMemory(info.Total)
 			resource := &pb.Response_Memory{
@@ -152,10 +152,13 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 				Resource:        resource,
 				AnyResourceData: resourceData,
 			})
+			fallthrough
+		default:
+			log.Printf("Now NOT support resource service type: ",
+				sub.sub_services) //.Xor(utils.NewBitMapFromString("11000000"))
+
 		}
-		//else {
-		//	log.Printf("not support resource service type: ", sub.sub_services.Xor(utils.NewBitMapFromString("11")))
-		//}
+
 		//whether Can it be integrated into the following single function
 		//if err = sub.stream.Send(&pb.Response{
 		//	ResourceData: fmt.Sprintf("data mock for: %d", id),

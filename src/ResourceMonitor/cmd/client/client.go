@@ -5,6 +5,7 @@ import (
 	"github.com/LearningGoProjects/ResourceMonitor/client"
 	"google.golang.org/grpc"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
@@ -37,8 +38,10 @@ func main() {
 		}
 		// Dispatch client goroutine
 		services := []string{"processor", "memory", "storage"}
+		log.Println("%%%%%%%%%%%%%%%%", strings.Join(services[:((i-1)%len(services)+1)], ","))
 
-		go client.Start(services[(i-1)%len(services)])
+		//go client.Start(strings.Join(services[:((i-1)%len(services)+1)],","))
+		go client.Start(services[:((i-1)%len(services) + 1)]...)
 
 		time.Sleep(time.Second * 2)
 	}

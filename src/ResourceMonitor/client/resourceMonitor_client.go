@@ -48,14 +48,6 @@ func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string
 			continue
 		}
 
-		//
-		//switch data := response.AnyResourceData.(type){
-		//case &pb.Response_Cpu:
-		//	data := &pb.Response_Cpu{}
-		//case &pb.Response_Memory:
-		//	data := &pb.Response_Memory{}
-		//}
-
 		//map[string]interface{} is good for everything
 		var data map[string]interface{}
 
@@ -63,10 +55,6 @@ func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string
 		if err != nil {
 			log.Print("Error while unmarshaling the response.AnyResourceData.GetValue()")
 		}
-		//err = response.AnyResourceData.UnmarshalTo(data)
-		//if err != nil {
-		//	log.Print("Error while unmarshaling the endorsement")
-		//}
 
 		//TypeUrl can be used for select which kind of anyResourceData type.
 		unmarshal := &pb.Response{}
@@ -92,16 +80,18 @@ func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string
 
 // subscribe subscribes to messages from the gRPC server
 func (resourceMonitorClient *ResourceMonitorClient) subscribe(sub_services ...string) (pb.ResourceMonitorService_SubscribeClient, error) {
-	log.Printf("Subscribing client ID: %d", resourceMonitorClient.id)
+	log.Printf("Subscribing client ID: %d", resourceMonitorClient.id, "	Subscribe Service:", sub_services)
 	for _, sub_service := range sub_services {
+		log.Printf("^^^^^^^^^^^^^^", sub_service)
 		if sub_service == "processor" {
-			resourceMonitorClient.sub_services.Set((1 << pb.ServiceType_ProcessorService) - 1)
+			resourceMonitorClient.sub_services.Set(int(pb.ServiceType_ProcessorService))
 		} else if sub_service == "memory" {
-			resourceMonitorClient.sub_services.Set((1 << pb.ServiceType_MemoryService) - 1)
+			resourceMonitorClient.sub_services.Set(int(pb.ServiceType_MemoryService))
 		} else if sub_service == "storage" {
-			resourceMonitorClient.sub_services.Set((1 << pb.ServiceType_StorageService) - 1)
+			resourceMonitorClient.sub_services.Set(int(pb.ServiceType_StorageService))
 		}
 	}
+	log.Println("**************", resourceMonitorClient.sub_services.String())
 	return resourceMonitorClient.service.Subscribe(context.Background(),
 		&pb.Request{Id: resourceMonitorClient.id, Filter: &pb.Filter{SubService: resourceMonitorClient.sub_services.Bytes()}}) //, Filter: &pb.Filter{ServiceType: &pb.ServiceType.ProcessorService}
 }
