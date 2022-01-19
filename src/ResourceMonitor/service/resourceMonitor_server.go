@@ -31,6 +31,10 @@ type sub struct {
 	sub_services *utils.BitMap                             //utils.BitMap
 }
 
+func (server *ResourceMonitorServer) GetSubscribers() sync.Map {
+	return server.subscribers
+}
+
 func (server *ResourceMonitorServer) Subscribe(
 	req *pb.Request,
 	stream pb.ResourceMonitorService_SubscribeServer,
@@ -185,7 +189,7 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 		//case sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet:
 		if sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet {
 			//default:
-			log.Printf("Now NOT support resource service type: ",
+			log.Printf("Now NOT support resource service type: %v",
 				sub.sub_services) //.Xor(utils.NewBitMapFromString("11000000"))
 		}
 

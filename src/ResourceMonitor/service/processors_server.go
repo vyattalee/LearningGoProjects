@@ -189,7 +189,7 @@ func (server *ProcessorsServer) SubscribeProcessorInfo(
 				err = stream.Send(res)
 				if err != nil {
 					waitResponse <- fmt.Errorf("cannot send stream response: %v", err)
-					return logError(status.Errorf(codes.Unknown, "cannot send stream response: %v", err, stream.SendMsg(nil)))
+					return logError(status.Errorf(codes.Unknown, "cannot send stream response: %v", err)) //for debug, stream.SendMsg(nil)
 				}
 
 			case <-quit:

@@ -68,11 +68,13 @@ func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string
 
 		switch response.Resource.(type) {
 		case *pb.Response_Cpu:
-			log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,
-				"\r\nresource-->CPU info:", response.GetCpu(), "\r\n #########Any type Data:", data) //response.GetAnyResourceData()
+			log.Printf("Client ID %d got response: %q \r\n", resourceMonitorClient.id, response.ResourceData)
+			log.Printf(" resource-->CPU info: %v", response.GetCpu())
+			log.Printf(" #########Any type Data: %v", data) //response.GetAnyResourceData()
 		case *pb.Response_Memory:
-			log.Printf("Client ID %d got response: %q", resourceMonitorClient.id, response.ResourceData,
-				"\r\nresource-->Memory info:", response.GetMemory(), "\r\n #########Any type Data:", data)
+			log.Printf("Client ID %d got response: %q \r\n", resourceMonitorClient.id, response.ResourceData)
+			log.Printf("resource-->Memory info: %v", response.GetMemory())
+			log.Printf(" #########Any type Data: %v", data)
 		}
 
 	}
@@ -80,9 +82,10 @@ func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string
 
 // subscribe subscribes to messages from the gRPC server
 func (resourceMonitorClient *ResourceMonitorClient) subscribe(sub_services ...string) (pb.ResourceMonitorService_SubscribeClient, error) {
-	log.Printf("Subscribing client ID: %d", resourceMonitorClient.id, "	Subscribe Service:", sub_services)
+	log.Printf("Subscribing client ID: %d", resourceMonitorClient.id)
+	log.Printf("	Subscribe Service: %v", sub_services)
 	for _, sub_service := range sub_services {
-		log.Printf("^^^^^^^^^^^^^^", sub_service)
+		log.Printf("^^^^^^^^^^^^^^ %v", sub_service)
 		if sub_service == "processor" {
 			resourceMonitorClient.sub_services.Set(int(pb.ServiceType_ProcessorService))
 		} else if sub_service == "memory" {
