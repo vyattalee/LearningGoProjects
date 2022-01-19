@@ -49,7 +49,7 @@ func TestResourceMonitorClient_Start(t *testing.T) {
 	}
 	require.NoError(t, err)
 
-	go clientX.Start("processor", "memory")
+	go clientX.Start("processor", "memory", "storage")
 
 	require.NotNil(t, resouceMonitorServer.GetSubscribers())
 	other, err := userStore.Find("admin1")

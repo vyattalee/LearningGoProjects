@@ -14,6 +14,6 @@ memory.proto:
 	protoc --proto_path=proto proto/memory_message.proto  --go_out=:pb --go-grpc_out=:pb --grpc-gateway_out=:pb
 
 test:
-	go test -v -cover -race ./...
+	go test -v -cover -covermode=atomic -coverprofile=cover.out ./...
 
 .PHONY: proto test clean server client
