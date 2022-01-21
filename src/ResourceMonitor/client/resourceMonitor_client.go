@@ -156,6 +156,7 @@ func authMethods() map[string]bool {
 
 // MKResourceMonitorClient creates a new client instance
 func MKResourceMonitorInterceptorClient(id int32, target string, opts ...grpc.DialOption) (*ResourceMonitorClient, error) {
+	//establish the first connection
 	conn, err := mkConnection(target, opts...)
 	if err != nil {
 		return nil, err
@@ -171,6 +172,7 @@ func MKResourceMonitorInterceptorClient(id int32, target string, opts ...grpc.Di
 		grpc.WithUnaryInterceptor(interceptor.Unary()),
 		grpc.WithStreamInterceptor(interceptor.Stream()))
 
+	//establish the second connection with unary&stream interceptor options
 	conn2, err := grpc.Dial(
 		target,
 		opts...)
