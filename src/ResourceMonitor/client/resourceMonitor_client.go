@@ -146,7 +146,7 @@ const (
 )
 
 func authMethods() map[string]bool {
-	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService/"
+	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService.Client/"
 
 	return map[string]bool{
 		resourceMonitorServicePath + "Subscribe":   true,

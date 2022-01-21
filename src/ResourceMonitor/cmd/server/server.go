@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-func loadTLSCredentials(onlyserversidetls bool) (credentials.TransportCredentials, error) {
+func loadTLSCredentials() (credentials.TransportCredentials, error) {
 	// Load certificate of the CA who signed client's certificate
 	pemClientCA, err := ioutil.ReadFile(utils.ClientCACertFile)
 	if err != nil {
@@ -41,9 +41,9 @@ func loadTLSCredentials(onlyserversidetls bool) (credentials.TransportCredential
 	// Create the credentials and return it
 	config := &tls.Config{
 		Certificates: []tls.Certificate{serverCert},
-		//ClientAuth:   tls.RequireAndVerifyClientCert,
-		ClientAuth: tls.NoClientCert,
-		ClientCAs:  certPool,
+		ClientAuth:   tls.RequireAndVerifyClientCert, //it is used for mutual TLS, client & server need to provide the certificate to each other
+		//ClientAuth: tls.NoClientCert,		//it is used for only server side TLS
+		ClientCAs: certPool,
 	}
 
 	return credentials.NewTLS(config), nil
@@ -161,7 +161,7 @@ func createUser(userStore service.UserStore, username, password, role string) er
 }
 
 func accessibleRoles() map[string][]string {
-	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService/"
+	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService.Server/"
 
 	return map[string][]string{
 		resourceMonitorServicePath + "Subscribe":   {"admin", "user"},
