@@ -7,8 +7,14 @@ clean:
 server:
 	go run cmd/server/server.go -port 8080
 
+server-tls:
+	go run cmd/server/server.go -port 8080 -tls
+
 client:
 	go run cmd/client/client.go  -address 0.0.0.0:8080
+
+client-tls:
+	go run cmd/client/client.go  -address 0.0.0.0:8080 -tls
 
 memory.proto:
 	protoc --proto_path=proto proto/memory_message.proto  --go_out=:pb --go-grpc_out=:pb --grpc-gateway_out=:pb
@@ -16,4 +22,8 @@ memory.proto:
 test:
 	go test -v -cover -covermode=atomic -coverprofile=cover.out ./...
 
-.PHONY: proto test clean server client
+cert:
+	cd cert; ./gen.sh; cd ..
+
+
+.PHONY: proto test clean server client cert

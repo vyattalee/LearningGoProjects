@@ -1,14 +1,46 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
+	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/client"
+	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"io/ioutil"
 	"log"
-	"strings"
 	"sync"
 	"time"
 )
+
+func loadTLSCredentials() (credentials.TransportCredentials, error) {
+	// Load certificate of the CA who signed server's certificate
+	pemServerCA, err := ioutil.ReadFile(utils.ClientCACertFile)
+	if err != nil {
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, fmt.Errorf("failed to add server CA's certificate")
+	}
+
+	// Load client's certificate and private key
+	//clientCert, err := tls.LoadX509KeyPair(utils.ClientCertFile, utils.ClientKeyFile)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	// Create the credentials and return it
+	config := &tls.Config{
+		//Certificates: []tls.Certificate{clientCert},
+		RootCAs: certPool,
+	}
+
+	return credentials.NewTLS(config), nil
+}
 
 func main() {
 	serverAddress := flag.String("address", "", "the server address")
@@ -18,14 +50,14 @@ func main() {
 
 	transportOption := grpc.WithInsecure()
 
-	//if *enableTLS {
-	//	tlsCredentials, err := loadTLSCredentials()
-	//	if err != nil {
-	//		log.Fatal("cannot load TLS credentials: ", err)
-	//	}
-	//
-	//	transportOption = grpc.WithTransportCredentials(tlsCredentials)
-	//}
+	if *enableTLS {
+		tlsCredentials, err := loadTLSCredentials()
+		if err != nil {
+			log.Fatal("cannot load TLS credentials: ", err)
+		}
+
+		transportOption = grpc.WithTransportCredentials(tlsCredentials)
+	}
 
 	var wg sync.WaitGroup
 
@@ -38,7 +70,7 @@ func main() {
 		}
 		// Dispatch clientX goroutine
 		services := []string{"processor", "memory", "storage"}
-		log.Println("%%%%%%%%%%%%%%%%", strings.Join(services[:((i-1)%len(services)+1)], ","))
+		//log.Println("%%%%%%%%%%%%%%%%", strings.Join(services[:((i-1)%len(services)+1)], ","))
 
 		//go clientX.Start(strings.Join(services[:((i-1)%len(services)+1)],","))
 		go clientX.Start(services[:((i-1)%len(services) + 1)]...)

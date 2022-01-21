@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
@@ -8,33 +10,68 @@ import (
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"time"
 )
 
-func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.MemoryServiceServer, enableTLS bool, listener net.Listener) error {
-
-	serverOptions := []grpc.ServerOption{
-		//grpc.UnaryInterceptor(interceptor.Unary()),
-		//grpc.StreamInterceptor(interceptor.Stream()),
-		grpc.ConnectionTimeout(30 * time.Second),
-		grpc.MaxConcurrentStreams(10),
-		//grpc.KeepaliveParams(keepalive.ServerParameters{
-		//	MaxConnectionIdle: 5 * time.Minute, //这个连接最大的空闲时间，超过就释放，解决proxy等到网络问题（不通知grpc的client和server）
-		//}),
+func loadTLSCredentials(onlyserversidetls bool) (credentials.TransportCredentials, error) {
+	// Load certificate of the CA who signed client's certificate
+	pemClientCA, err := ioutil.ReadFile(utils.ClientCACertFile)
+	if err != nil {
+		return nil, err
 	}
 
-	//if enableTLS {
-	//	tlsCredentials, err := loadTLSCredentials()
-	//	if err != nil {
-	//		return fmt.Errorf("cannot load TLS credentials: %w", err)
-	//	}
-	//
-	//	serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
-	//}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemClientCA) {
+		return nil, fmt.Errorf("failed to add client CA's certificate")
+	}
+
+	// Load server's certificate and private key
+	serverCert, err := tls.LoadX509KeyPair(utils.ServerCertFile, utils.ServerKeyFile)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the credentials and return it
+	config := &tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		//ClientAuth:   tls.RequireAndVerifyClientCert,
+		ClientAuth: tls.NoClientCert,
+		ClientCAs:  certPool,
+	}
+
+	return credentials.NewTLS(config), nil
+}
+
+func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.MemoryServiceServer, enableTLS bool, listener net.Listener) error {
+
+	jwtManager := service.NewJWTManager(utils.SecretKey, utils.TokenDuration)
+
+	interceptor := service.NewAuthInterceptor(jwtManager, accessibleRoles())
+	serverOptions := []grpc.ServerOption{
+		grpc.UnaryInterceptor(interceptor.Unary()),
+		grpc.StreamInterceptor(interceptor.Stream()),
+		grpc.ConnectionTimeout(30 * time.Second),
+		grpc.MaxConcurrentStreams(10),
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			MaxConnectionIdle: 5 * time.Minute, //这个连接最大的空闲时间，超过就释放，解决proxy等到网络问题（不通知grpc的client和server）
+		}),
+	}
+
+	if enableTLS {
+		tlsCredentials, err := loadTLSCredentials()
+		if err != nil {
+			return fmt.Errorf("cannot load TLS credentials: %w", err)
+		}
+
+		serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
+	}
 
 	grpcServer := grpc.NewServer(serverOptions...)
 
@@ -44,9 +81,7 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 		log.Fatal("cannot seed users: ", err)
 	}
 
-	jwtManager := service.NewJWTManager(utils.SecretKey, utils.TokenDuration)
 	authServer := service.NewAuthServer(userStore, jwtManager)
-
 	resourceMonitorServer := service.NewResourceMonitorServer()
 
 	// Register the server
@@ -123,4 +158,13 @@ func createUser(userStore service.UserStore, username, password, role string) er
 		return err
 	}
 	return userStore.Save(user)
+}
+
+func accessibleRoles() map[string][]string {
+	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService/"
+
+	return map[string][]string{
+		resourceMonitorServicePath + "Subscribe":   {"admin", "user"},
+		resourceMonitorServicePath + "Unsubscribe": {"admin", "user"},
+	}
 }

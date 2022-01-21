@@ -85,7 +85,7 @@ func (resourceMonitorClient *ResourceMonitorClient) subscribe(sub_services ...st
 	log.Printf("Subscribing client ID: %d", resourceMonitorClient.id)
 	log.Printf("	Subscribe Service: %v", sub_services)
 	for _, sub_service := range sub_services {
-		log.Printf("^^^^^^^^^^^^^^ %v", sub_service)
+		//log.Printf("^^^^^^^^^^^^^^ %v", sub_service)
 		if sub_service == "processor" {
 			resourceMonitorClient.sub_services.Set(int(pb.ServiceType_ProcessorService))
 		} else if sub_service == "memory" {
@@ -94,7 +94,7 @@ func (resourceMonitorClient *ResourceMonitorClient) subscribe(sub_services ...st
 			resourceMonitorClient.sub_services.Set(int(pb.ServiceType_StorageService))
 		}
 	}
-	log.Println("**************", resourceMonitorClient.sub_services.String())
+	//log.Println("**************", resourceMonitorClient.sub_services.String())
 	return resourceMonitorClient.service.Subscribe(context.Background(),
 		&pb.Request{Id: resourceMonitorClient.id, Filter: &pb.Filter{SubService: resourceMonitorClient.sub_services.Bytes()}}) //, Filter: &pb.Filter{ServiceType: &pb.ServiceType.ProcessorService}
 }
@@ -149,7 +149,7 @@ func authMethods() map[string]bool {
 	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService/"
 
 	return map[string]bool{
-		//resourceMonitorServicePath + "Subscribe":   true,
+		resourceMonitorServicePath + "Subscribe":   true,
 		resourceMonitorServicePath + "Unsubscribe": true,
 	}
 }
@@ -167,14 +167,14 @@ func MKResourceMonitorInterceptorClient(id int32, target string, opts ...grpc.Di
 		log.Fatal("cannot create auth interceptor: ", err)
 	}
 
-	transportOption := grpc.WithInsecure()
+	opts = append(opts,
+		grpc.WithUnaryInterceptor(interceptor.Unary()),
+		grpc.WithStreamInterceptor(interceptor.Stream()))
 
 	conn2, err := grpc.Dial(
 		target,
-		transportOption,
-		grpc.WithUnaryInterceptor(interceptor.Unary()),
-		grpc.WithStreamInterceptor(interceptor.Stream()),
-	)
+		opts...)
+
 	if err != nil {
 		log.Fatal("cannot dial server: ", err)
 	}
