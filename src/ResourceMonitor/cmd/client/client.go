@@ -74,6 +74,7 @@ func main() {
 		serverAddress = *ss
 		enableTLS = *tls
 	} else {
+		log.Println("Use YAML config file Now!")
 		//serverAddress = config.GetServerAddress()
 		//enableTLS = config.GetTLS()
 		serverAddress = viper.GetString("server.address") + ":" + viper.GetString("server.port")
