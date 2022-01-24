@@ -49,21 +49,6 @@ func main() {
 	var serverAddress string
 	var enableTLS bool
 
-	//var config conf.Config
-
-	//var runtime_viper = viper.New()
-	//runtime_viper.AddConfigPath("./conf")
-	//runtime_viper.SetConfigName("client")
-	//runtime_viper.SetConfigType("yaml")
-	//
-	//
-	//err := runtime_viper.ReadInConfig()
-	//if err != nil {
-	//	return
-	//}
-	//
-	//err = runtime_viper.Unmarshal(&config)
-
 	_, err := conf.LoadConfig("")
 	if err != nil {
 		log.Println("cannot load config:", err)
