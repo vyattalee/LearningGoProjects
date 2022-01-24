@@ -6,7 +6,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/client"
+	"github.com/LearningGoProjects/ResourceMonitor/conf"
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io/ioutil"
@@ -43,14 +45,46 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 }
 
 func main() {
-	serverAddress := flag.String("address", "", "the server address")
-	enableTLS := flag.Bool("tls", false, "enable SSL/TLS")
-	flag.Parse()
-	log.Printf("connecting server %s, TLS = %t", *serverAddress, *enableTLS)
+
+	var serverAddress string
+	var enableTLS bool
+
+	//var config conf.Config
+
+	//var runtime_viper = viper.New()
+	//runtime_viper.AddConfigPath("./conf")
+	//runtime_viper.SetConfigName("client")
+	//runtime_viper.SetConfigType("yaml")
+	//
+	//
+	//err := runtime_viper.ReadInConfig()
+	//if err != nil {
+	//	return
+	//}
+	//
+	//err = runtime_viper.Unmarshal(&config)
+
+	_, err := conf.LoadConfig("")
+	if err != nil {
+		log.Println("cannot load config:", err)
+		log.Println("Use runtime parameters Now!")
+		ss := flag.String("address", "", "the server address")
+		tls := flag.Bool("tls", false, "enable SSL/TLS")
+		flag.Parse()
+		serverAddress = *ss
+		enableTLS = *tls
+	} else {
+		//serverAddress = config.GetServerAddress()
+		//enableTLS = config.GetTLS()
+		serverAddress = viper.GetString("server.address") + ":" + viper.GetString("server.port")
+		enableTLS = viper.GetBool("tls")
+	}
+
+	log.Printf("connecting server %s, TLS = %t", serverAddress, enableTLS)
 
 	transportOption := grpc.WithInsecure()
 
-	if *enableTLS {
+	if enableTLS {
 		tlsCredentials, err := loadTLSCredentials()
 		if err != nil {
 			log.Fatal("cannot load TLS credentials: ", err)
@@ -63,7 +97,7 @@ func main() {
 
 	for i := 1; i <= 5; i++ {
 		wg.Add(1)
-		clientX, err := client.MKResourceMonitorInterceptorClient(int32(i), *serverAddress, transportOption)
+		clientX, err := client.MKResourceMonitorInterceptorClient(int32(i), serverAddress, transportOption)
 		//clientX, err := clientX.MKResourceMonitorClient(int32(i), *serverAddress, transportOption)
 		if err != nil {
 			log.Fatal(err)
