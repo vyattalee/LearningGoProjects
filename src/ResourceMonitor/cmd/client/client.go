@@ -49,8 +49,9 @@ func main() {
 	var serverAddress string
 	var enableTLS bool
 
-	configdata, err := conf.LoadConfig("")
-	log.Println("conf.LoadConfig:", configdata)
+	config, err := conf.LoadConfig("./conf/client.yaml")
+	//config, err := conf.LoadEnvConfig("./conf/")
+	log.Println("client LoadConfig:", config)
 
 	if err != nil {
 		log.Println("cannot load config:", err)
@@ -66,6 +67,8 @@ func main() {
 		//enableTLS = config.GetTLS()
 		serverAddress = viper.GetString("server.address") + ":" + viper.GetString("server.port")
 		enableTLS = viper.GetBool("tls")
+		//serverAddress = config.GetServerAddress()
+		//enableTLS = config.GetTLS()
 	}
 
 	log.Printf("connecting server %s, TLS = %t", serverAddress, enableTLS)

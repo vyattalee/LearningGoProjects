@@ -20,18 +20,24 @@ var (
 )
 
 type Config struct {
-	server Server `yaml: "server"	mapstructure: "server"`
+	server Server `yaml:	"server"	mapstructure: "server"`
 	tls    bool   `yaml:	"tls"	mapstructure: "tls"`
 }
 
+//type Config struct {
+//	server string `yaml:	"server"	mapstructure: "server"`
+//	tls    bool   `yaml:	"tls"	mapstructure: "tls"`
+//}
+
 type Server struct {
 	address string `yaml:	"address"	mapstructure: "address"`
-	port    string `yaml:	"port"	mapstructure: "port"`
+	port    uint16 `yaml:	"port"	mapstructure: "port"`
 }
 
 func (config *Config) GetServerAddress() string {
 
-	return config.server.address + ":" + config.server.port
+	return (config.server.address) + ":" + string(config.server.port)
+	//return config.server
 }
 
 func (config *Config) GetTLS() bool {
@@ -66,7 +72,7 @@ func LoadConfigPointer(path string) (config *Config, err error) {
 	return &cfg, err
 }
 
-// LoadConfigPointer reads configuration from yaml file or environment variables.
+// LoadConfig reads configuration from yaml file or environment variables.
 func LoadConfig(path string) (config Config, err error) {
 
 	if path == "" {
@@ -78,11 +84,10 @@ func LoadConfig(path string) (config Config, err error) {
 		path += "/conf"
 	}
 
-	viper.AddConfigPath(path)
-	viper.SetConfigName("client")
+	viper.SetConfigFile(path)
 	viper.SetConfigType("yaml")
 
-	viper.AutomaticEnv()
+	//viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()
 	if err != nil {
@@ -102,10 +107,27 @@ func LoadConfig(path string) (config Config, err error) {
 
 	viper.WatchConfig()
 
-	err = viper.Unmarshal(&config)
+	//err = viper.Unmarshal(&config)
 
-	log.Println("config:", config)
+	//log.Println("config:", config)
 	return config, nil
+}
+
+// LoadConfig reads configuration from file or environment variables.
+func LoadEnvConfig(path string) (config Config, err error) {
+	viper.AddConfigPath(path)
+	viper.SetConfigName("client.env")
+	viper.SetConfigType("env")
+
+	viper.AutomaticEnv()
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		return
+	}
+
+	err = viper.Unmarshal(&config)
+	return
 }
 
 // ViperInit 初始化viper配置解析包，函数可接受命令行参数
