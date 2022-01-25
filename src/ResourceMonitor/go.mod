@@ -3,6 +3,7 @@ module github.com/LearningGoProjects/ResourceMonitor
 go 1.16
 
 require (
+	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.6 // indirect

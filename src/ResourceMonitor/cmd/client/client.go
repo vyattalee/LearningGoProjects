@@ -49,7 +49,9 @@ func main() {
 	var serverAddress string
 	var enableTLS bool
 
-	_, err := conf.LoadConfig("")
+	configdata, err := conf.LoadConfig("")
+	log.Println("conf.LoadConfig:", configdata)
+
 	if err != nil {
 		log.Println("cannot load config:", err)
 		log.Println("Use runtime parameters Now!")
