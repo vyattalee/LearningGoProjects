@@ -1,0 +1,52 @@
+syntax="proto3";
+
+package LearningGoProjects.ResourceMonitor;
+
+option go_package = ".;pb";
+
+message Storage {
+  repeated PartitionStat partition  = 1;
+  UsageStat usage  = 2;
+  map<string,IOCountersStat> ioCount  = 3;
+
+}
+
+message PartitionStat{
+  string device   = 1;
+  string mountPoint  = 2;
+  string fsType      = 3;
+  string opts = 4;
+}
+
+
+message UsageStat {
+  string path   = 1;
+  string  fsType    = 2;
+  uint64  total     = 3;
+  uint64  free   = 4;
+  uint64  used     = 5;
+  double  usedPercent    = 6;
+  uint64  inodesTotal      = 7;
+  uint64  inodesUsed     = 8;
+  uint64  inodesFree         = 9;
+  double   inodesUsedPercent    = 10;
+
+}
+
+
+message IOCountersStat {
+  uint64 readCount    = 1;
+  uint64   mergedReadCount    = 2;
+  uint64   writeCount    = 3;
+  uint64   mergedWriteCount     = 4;
+  uint64   readBytes       = 5;
+  uint64   writeBytes       = 6;
+  uint64   readTime       = 7;
+  uint64   writeTime          = 8;
+  uint64  iopsInProgress       = 9;
+  uint64   ioTime       = 10;
+  uint64 weightedIO        = 11;
+  string   name       = 12;
+  string  serialNumber     = 13;
+  string  label       = 14;
+    }
