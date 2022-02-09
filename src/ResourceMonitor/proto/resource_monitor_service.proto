@@ -7,6 +7,7 @@ option go_package = ".;pb";
 import "processors_message.proto";
 import "memory_message.proto";
 import "filter_message.proto";
+import "storage_message.proto";
 
 import "google/protobuf/any.proto";
 
@@ -24,9 +25,10 @@ message Response{
       CPU cpu = 2;
       GPU gpu = 3;
       Memory memory = 4;
+      Storage storage = 5;
     };
 
-  google.protobuf.Any anyResourceData = 5;
+  google.protobuf.Any anyResourceData = 6;
 }
 
 service ResourceMonitorService {

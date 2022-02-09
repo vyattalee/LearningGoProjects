@@ -138,7 +138,7 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 		if sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet {
 
 			log.Println("sub.sub_services.Bit(int(pb.ServiceType_ProcessorService))")
-			cpu, err = CollectResource()
+			cpu, err = CollectCPUGPUResource()
 			if err != nil {
 
 				return false
@@ -189,8 +189,29 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 		//case sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet:
 		if sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet {
 			//default:
-			log.Printf("Now NOT support resource service type: %v",
-				sub.sub_services) //.Xor(utils.NewBitMapFromString("11000000"))
+			log.Println("sub.sub_services.Bit(int(pb.ServiceType_StorageService))")
+
+			storage, err := getStorageInfo()
+
+			resource := &pb.Response_Storage{
+				//	Memory: &pb.Memory{Value: val, Unit: unit},
+			}
+
+			byteData, err = json.Marshal(storage)
+			if err != nil {
+				log.Printf("Could not convert data input to bytes")
+			}
+			resourceData := &any.Any{
+				TypeUrl: "anyResourceData_storage",
+				Value:   byteData,
+			}
+			err = sub.stream.Send(&pb.Response{
+				ResourceData:    fmt.Sprintf("data mock for: %d", id),
+				Resource:        resource,
+				AnyResourceData: resourceData,
+			})
+			//log.Printf("Now NOT support resource service type: %v",
+			//	sub.sub_services) //.Xor(utils.NewBitMapFromString("11000000"))
 		}
 
 		//}  //end of switch

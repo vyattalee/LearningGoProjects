@@ -6,7 +6,7 @@ option go_package = ".;pb";
 
 message Storage {
   repeated PartitionStat partition  = 1;
-  UsageStat usage  = 2;
+  repeated UsageStat usage  = 2;
   map<string,IOCountersStat> ioCount  = 3;
 
 }

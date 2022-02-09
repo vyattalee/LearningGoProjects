@@ -63,6 +63,8 @@ func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string
 			ptypes.UnmarshalAny(response.AnyResourceData, unmarshal)
 		case "anyResourceData_memory":
 			ptypes.UnmarshalAny(response.AnyResourceData, unmarshal)
+		case "anyResourceData_storage":
+			ptypes.UnmarshalAny(response.AnyResourceData, unmarshal)
 
 		}
 
@@ -74,6 +76,10 @@ func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string
 		case *pb.Response_Memory:
 			log.Printf("Client ID %d got response: %q \r\n", resourceMonitorClient.id, response.ResourceData)
 			log.Printf("resource-->Memory info: %v", response.GetMemory())
+			log.Printf(" #########Any type Data: %v", data)
+		case *pb.Response_Storage:
+			log.Printf("Client ID %d got response: %q \r\n", resourceMonitorClient.id, response.ResourceData)
+			log.Printf("resource-->Storage info: %v", response.GetStorage())
 			log.Printf(" #########Any type Data: %v", data)
 		}
 
