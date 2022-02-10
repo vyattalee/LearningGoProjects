@@ -194,7 +194,12 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 			storage, err := getStorageInfo()
 
 			resource := &pb.Response_Storage{
-				//	Memory: &pb.Memory{Value: val, Unit: unit},
+				//Storage: &pb.Storage{
+				//	Partition: storage.Partition,
+				//	Usage: storage.Usage,
+				//	IoCount: storage.IoCount,
+				//},
+				Storage: storage,
 			}
 
 			byteData, err = json.Marshal(storage)

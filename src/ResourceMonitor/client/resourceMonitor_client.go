@@ -81,6 +81,7 @@ func (resourceMonitorClient *ResourceMonitorClient) Start(sub_services ...string
 			log.Printf("Client ID %d got response: %q \r\n", resourceMonitorClient.id, response.ResourceData)
 			log.Printf("resource-->Storage info: %v", response.GetStorage())
 			log.Printf(" #########Any type Data: %v", data)
+			//log.Printf("@@@@@@@@@@@Any Type Unmarshal Data: %s", unmarshal)
 		}
 
 	}
