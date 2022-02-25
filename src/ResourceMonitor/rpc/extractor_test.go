@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/Allenxuxu/stark/example/rpc/routeguide"
+	pb "github.com/LearningGoProjects/ResourceMonitor/example/rpc/routeguide"
 	"github.com/stretchr/testify/assert"
 )
 

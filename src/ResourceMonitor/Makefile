@@ -5,16 +5,16 @@ clean:
 	rm pb/*
 
 server:
-	go run cmd/server/server.go -port 8080
+	go run cmd/server/main.go cmd/server/grpc_server.go cmd/server/restful_server.go -port 8080
 
 server-tls:
-	go run cmd/server/server.go -port 8080 -tls
+	go run cmd/server/main.go cmd/server/grpc_server.go cmd/server/restful_server.go -port 8080 -tls
 
 client:
-	go run cmd/client/client.go  -address 0.0.0.0:8080
+	go run cmd/client/main.go  -address 0.0.0.0:8080
 
 client-tls:
-	go run cmd/client/client.go  -address 0.0.0.0:8080 -tls
+	go run cmd/client/main.go  -address 0.0.0.0:8080 -tls
 
 memory.proto:
 	protoc --proto_path=proto proto/memory_message.proto  --go_out=:pb --go-grpc_out=:pb --grpc-gateway_out=:pb

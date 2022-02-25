@@ -3,7 +3,7 @@ package mdns
 import (
 	"testing"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 )
 
 func TestEncoding(t *testing.T) {

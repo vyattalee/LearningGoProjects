@@ -4,10 +4,10 @@ import (
 	"errors"
 	"sync/atomic"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 
-	"github.com/Allenxuxu/stark/log"
-	"github.com/Allenxuxu/stark/rpc/client/selector"
+	"github.com/LearningGoProjects/ResourceMonitor/log"
+	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
 	"google.golang.org/grpc/resolver"
 )
 

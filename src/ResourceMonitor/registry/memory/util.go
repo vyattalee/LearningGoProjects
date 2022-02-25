@@ -3,7 +3,7 @@ package memory
 import (
 	"time"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 )
 
 func serviceToRecord(s *registry.Service, ttl time.Duration) *record {

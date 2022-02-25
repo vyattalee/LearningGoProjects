@@ -3,7 +3,7 @@ package memory
 import (
 	"errors"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 )
 
 type memoryWatcher struct {

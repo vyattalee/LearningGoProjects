@@ -3,7 +3,7 @@ package selector
 import (
 	"context"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 )
 
 type Options struct {

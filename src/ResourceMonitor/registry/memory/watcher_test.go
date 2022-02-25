@@ -3,7 +3,7 @@ package memory
 import (
 	"testing"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 )
 
 func TestWatcher(t *testing.T) {

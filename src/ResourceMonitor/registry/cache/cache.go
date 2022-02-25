@@ -7,10 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Allenxuxu/stark/util"
-
-	"github.com/Allenxuxu/stark/log"
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/log"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 )
 
 // Cache is the registry cache interface

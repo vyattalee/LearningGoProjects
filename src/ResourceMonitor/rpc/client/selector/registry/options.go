@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Allenxuxu/stark/rpc/client/selector"
+	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
 )
 
 const ttlKey = "selector_ttl"

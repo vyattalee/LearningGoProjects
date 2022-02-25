@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Allenxuxu/stark/pkg/mdns"
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/thirdparty/mdns"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 	"github.com/google/uuid"
 )
 

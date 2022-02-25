@@ -5,10 +5,10 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/Allenxuxu/stark/rpc/client/selector"
+	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
 
-	"github.com/Allenxuxu/stark/registry"
-	"github.com/Allenxuxu/stark/registry/memory"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry/memory"
 	"github.com/stretchr/testify/assert"
 )
 

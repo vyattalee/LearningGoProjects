@@ -11,9 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Allenxuxu/stark/util"
-
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 	consul "github.com/hashicorp/consul/api"
 	hash "github.com/mitchellh/hashstructure"
 )

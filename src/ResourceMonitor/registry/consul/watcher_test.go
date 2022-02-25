@@ -3,7 +3,7 @@ package consul
 import (
 	"testing"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 	"github.com/hashicorp/consul/api"
 )
 

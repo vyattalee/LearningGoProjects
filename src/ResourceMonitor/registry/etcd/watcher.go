@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 	"go.etcd.io/etcd/clientv3"
 )
 

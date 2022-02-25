@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Allenxuxu/stark/pkg/mdns"
-	registry2 "github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/thirdparty/mdns"
+	registry2 "github.com/LearningGoProjects/ResourceMonitor/registry"
 )
 
 type mdnsWatcher struct {

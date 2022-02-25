@@ -3,14 +3,10 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"fmt"
-	"github.com/LearningGoProjects/ResourceMonitor/conf"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
 	"github.com/LearningGoProjects/ResourceMonitor/service"
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
@@ -20,7 +16,29 @@ import (
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/rest"
+	restSelector "github.com/LearningGoProjects/ResourceMonitor/rest/client/selector"
+	"github.com/LearningGoProjects/ResourceMonitor/rpc"
+	rpcSelector "github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
 )
+
+func NewRPCServer(rg registry.Registry, opt ...rpc.ServerOption) *rpc.Server {
+	return rpc.NewServer(rg, opt...)
+}
+
+func NewRPCClient(name string, s rpcSelector.Selector, opt ...rpc.ClientOption) (*rpc.Client, error) {
+	return rpc.NewClient(name, s, opt...)
+}
+
+func NewRestServer(rg registry.Registry, handler http.Handler, opts ...rest.ServerOption) *rest.Server {
+	return rest.NewSever(rg, handler, opts...)
+}
+
+func NewRestClient(name string, s restSelector.Selector, opt ...rest.ClientOption) (*rest.Client, error) {
+	return rest.NewClient(name, s, opt...)
+}
 
 func loadTLSCredentials() (credentials.TransportCredentials, error) {
 	// Load certificate of the CA who signed client's certificate
@@ -98,81 +116,6 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 
 	log.Printf("Start GRPC server at %s, TLS = %t", listener.Addr().String(), enableTLS)
 	return grpcServer.Serve(listener)
-}
-
-func runRESTServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.MemoryServiceServer, enableTLS bool, listener net.Listener, grpcEndpoint string) error {
-	mux := runtime.NewServeMux()
-	//dialOptions := []grpc.DialOption{grpc.WithInsecure()}
-
-	//ctx, cancel := context.WithCancel(context.Background())
-	//defer cancel()
-
-	// in-process handler
-	// err := pb.RegisterAuthServiceHandlerServer(ctx, mux, authServer)
-
-	log.Printf("Start REST server at %s, TLS = %t", listener.Addr().String(), enableTLS)
-	//if enableTLS {
-	//	return http.ServeTLS(listener, mux, serverCertFile, serverKeyFile)
-	//}
-	return http.Serve(listener, mux)
-}
-
-func main() {
-
-	var serverAddress, serverType string
-	var endPoint string
-	var enableTLS bool
-
-	config, err := conf.LoadConfig("./conf/server.yaml")
-	//config, err := conf.LoadEnvConfig("./conf/")
-	log.Println("client LoadConfig:", config)
-
-	if err != nil {
-		log.Println("cannot load config:", err)
-		log.Println("Use runtime parameters Now!")
-		server_port := flag.Int("port", 0, "the server port")
-		tls := flag.Bool("tls", false, "enable SSL/TLS")
-		server_type := flag.String("type", "grpc", "type of server (grpc/rest)")
-		end_point := flag.String("endpoint", "", "gRPC endpoint")
-		flag.Parse()
-
-		serverAddress = fmt.Sprintf("0.0.0.0:%d", *server_port)
-		enableTLS = *tls
-		serverType = *server_type
-		endPoint = *end_point
-
-	} else {
-		log.Println("Use YAML config file Now!")
-		//serverAddress = config.GetServerAddress()
-		//enableTLS = config.GetTLS()
-		serverAddress = viper.GetString("server.address") + ":" + viper.GetString("server.port")
-		enableTLS = viper.GetBool("tls")
-		serverType = viper.GetString("type")
-		endPoint = viper.GetString("endpoint")
-		//serverAddress = config.GetServerAddress()
-		//enableTLS = config.GetTLS()
-	}
-
-	//each server's service must be register to grpcserver
-	processors_server := service.NewProcessorsServer()
-	memory_server := service.NewMemoryServer()
-
-	//
-	listener, err := net.Listen("tcp", serverAddress)
-	if err != nil {
-		log.Fatal("cannot start server: ", err)
-	}
-
-	if serverType == "grpc" {
-		err = runGRPCServer(processors_server, memory_server, enableTLS, listener)
-	} else {
-		err = runRESTServer(processors_server, memory_server, enableTLS, listener, endPoint)
-	}
-
-	if err != nil {
-		log.Fatal("cannot start server: ", err)
-	}
-
 }
 
 func seedUsers(userStore service.UserStore) error {

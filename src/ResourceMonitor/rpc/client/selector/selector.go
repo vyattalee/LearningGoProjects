@@ -3,7 +3,7 @@ package selector
 import (
 	"errors"
 
-	"github.com/Allenxuxu/stark/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
 )
 
 var (

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/Allenxuxu/stark/registry"
-	sr "github.com/Allenxuxu/stark/rpc/client/resolver"
-	"github.com/Allenxuxu/stark/rpc/client/selector"
+	"github.com/LearningGoProjects/ResourceMonitor/registry"
+	sr "github.com/LearningGoProjects/ResourceMonitor/rpc/client/resolver"
+	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
 	"google.golang.org/grpc/resolver"
 )
 
