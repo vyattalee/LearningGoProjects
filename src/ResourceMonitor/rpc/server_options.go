@@ -103,3 +103,15 @@ func StreamServerInterceptor(u ...grpc.StreamServerInterceptor) ServerOption {
 		o.GrpcOpts = append(o.GrpcOpts, grpc.ChainStreamInterceptor(u...))
 	}
 }
+
+func GrpcOpt(opt grpc.ServerOption) ServerOption {
+	return func(o *ServerOptions) {
+		o.GrpcOpts = append(o.GrpcOpts, opt)
+	}
+}
+
+func GrpcOpts(opts []grpc.ServerOption) ServerOption {
+	return func(o *ServerOptions) {
+		o.GrpcOpts = append(o.GrpcOpts, opts...)
+	}
+}

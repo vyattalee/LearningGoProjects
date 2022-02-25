@@ -1,15 +1,19 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
+	"github.com/LearningGoProjects/ResourceMonitor/registry/etcd"
+	"github.com/LearningGoProjects/ResourceMonitor/rpc/server/middleware/ratelimit"
 	"github.com/LearningGoProjects/ResourceMonitor/service"
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
 	"io/ioutil"
 	"log"
@@ -22,6 +26,8 @@ import (
 	restSelector "github.com/LearningGoProjects/ResourceMonitor/rest/client/selector"
 	"github.com/LearningGoProjects/ResourceMonitor/rpc"
 	rpcSelector "github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
+
+	"github.com/Allenxuxu/ratelimit/tokenbucket"
 )
 
 func NewRPCServer(rg registry.Registry, opt ...rpc.ServerOption) *rpc.Server {
@@ -38,6 +44,15 @@ func NewRestServer(rg registry.Registry, handler http.Handler, opts ...rest.Serv
 
 func NewRestClient(name string, s restSelector.Selector, opt ...rest.ClientOption) (*rest.Client, error) {
 	return rest.NewClient(name, s, opt...)
+}
+
+func interceptorFun(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	st := time.Now()
+	resp, err = handler(ctx, req)
+
+	p, _ := peer.FromContext(ctx)
+	log.Printf("method: %s time: %v, peer : %s\n", info.FullMethod, time.Since(st), p.Addr)
+	return resp, err
 }
 
 func loadTLSCredentials() (credentials.TransportCredentials, error) {
@@ -72,7 +87,6 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.MemoryServiceServer, enableTLS bool, listener net.Listener) error {
 
 	jwtManager := service.NewJWTManager(utils.SecretKey, utils.TokenDuration)
-
 	interceptor := service.NewAuthInterceptor(jwtManager, accessibleRoles())
 	serverOptions := []grpc.ServerOption{
 		grpc.UnaryInterceptor(interceptor.Unary()),
@@ -93,10 +107,32 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 		serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
 	}
 
-	grpcServer := grpc.NewServer(serverOptions...)
+	rg, err := etcd.NewRegistry()
+	if err != nil {
+		panic(err)
+	}
+
+	rpcServer := NewRPCServer(rg,
+		rpc.Name("ResourceMonitor.CPU"),
+		rpc.Version("v1.0.0"),
+		rpc.Metadata(map[string]string{
+			"server":           "rpc",
+			"resource_monitor": "1",
+		}),
+		rpc.MetricsAddress(":9091"),
+		rpc.UnaryServerInterceptor(
+			interceptorFun,
+			ratelimit.UnaryServerInterceptor(tokenbucket.New(10, 10)),
+		),
+		rpc.StreamServerInterceptor(
+			ratelimit.StreamServerInterceptor(tokenbucket.New(10, 10)),
+		),
+
+		rpc.GrpcOpts(serverOptions),
+	)
 
 	userStore := service.NewInMemoryUserStore()
-	err := seedUsers(userStore)
+	err = seedUsers(userStore)
 	if err != nil {
 		log.Fatal("cannot seed users: ", err)
 	}
@@ -105,17 +141,17 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 	resourceMonitorServer := service.NewResourceMonitorServer()
 
 	// Register the server
-	pb.RegisterAuthServiceServer(grpcServer, authServer)
-	pb.RegisterResourceMonitorServiceServer(grpcServer, resourceMonitorServer)
-	pb.RegisterProcessorsServiceServer(grpcServer, processorsServer)
-	//pb.RegisterMemoryServiceServer(grpcServer, memoryServer)
-	reflection.Register(grpcServer)
+	pb.RegisterAuthServiceServer(rpcServer.GrpcServer(), authServer)
+	pb.RegisterResourceMonitorServiceServer(rpcServer.GrpcServer(), resourceMonitorServer)
+	pb.RegisterProcessorsServiceServer(rpcServer.GrpcServer(), processorsServer)
+	//pb.RegisterMemoryServiceServer(rpcServer, memoryServer)
+	reflection.Register(rpcServer.GrpcServer())
 
 	// Start sending data to subscribers
 	go resourceMonitorServer.StartService()
 
 	log.Printf("Start GRPC server at %s, TLS = %t", listener.Addr().String(), enableTLS)
-	return grpcServer.Serve(listener)
+	return rpcServer.GrpcServer().Serve(listener)
 }
 
 func seedUsers(userStore service.UserStore) error {

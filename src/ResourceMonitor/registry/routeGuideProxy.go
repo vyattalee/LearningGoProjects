@@ -5,8 +5,6 @@ import (
 
 	pb "github.com/LearningGoProjects/ResourceMonitor/registry/routeguide"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/peer"
 	"io"
 	"log"
 	"time"
@@ -82,50 +80,3 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 		}
 	}
 }
-
-func interceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	st := time.Now()
-	resp, err = handler(ctx, req)
-
-	p, _ := peer.FromContext(ctx)
-	log.Printf("method: %s time: %v, peer : %s\n", info.FullMethod, time.Since(st), p.Addr)
-	return resp, err
-}
-
-//
-//func ServiceRegistrar(grpcServer *grpc.Server) {
-//	//rg, err := consul.NewRegistry()
-//	//rg, err := mdns.NewRegistry()
-//	rg, err := etcd.NewRegistry()
-//	if err != nil {
-//		panic(err)
-//	}
-//	log.Printf("rg:", rg)
-//
-//	//s := resourceMonitor.NewRPCServer(rg,
-//	//	rpc.Name("stark.rpc.test"),
-//	//	rpc.Version("v2.0.1"),
-//	//	rpc.Metadata(map[string]string{
-//	//		"server": "rpc",
-//	//		"test":   "1",
-//	//	}),
-//	//	rpc.MetricsAddress(":9091"),
-//	//	rpc.UnaryServerInterceptor(
-//	//		interceptor,
-//	//		ratelimit.UnaryServerInterceptor(tokenbucket.New(10, 5)),
-//	//	),
-//	//	rpc.StreamServerInterceptor(
-//	//		ratelimit.StreamServerInterceptor(tokenbucket.New(10, 5)),
-//	//	),
-//	//)
-//
-//	rs := NewServer()
-//
-//	reflection.Register(grpcServer)
-//
-//	pb.RegisterRouteGuideServer(grpcServer, rs)
-//
-//	//if err := s.Start(); err != nil {
-//	//	panic(err)
-//	//}
-//}

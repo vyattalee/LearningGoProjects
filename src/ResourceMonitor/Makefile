@@ -1,3 +1,6 @@
+prepare:
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
+
 proto:
 	protoc --proto_path=proto proto/*.proto  --go_out=:pb --go-grpc_out=:pb --grpc-gateway_out=:pb
 
