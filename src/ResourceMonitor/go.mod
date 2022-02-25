@@ -1,8 +1,8 @@
 module github.com/LearningGoProjects/ResourceMonitor
 
-go 1.16
+go 1.15
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
+//replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
 
 require (
 	github.com/Allenxuxu/ratelimit v0.0.0-20210131080358-1c878c80259b
@@ -37,7 +37,7 @@ require (
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 	golang.org/x/sys v0.0.0-20220224120231-95c6836cb0e7 // indirect
-	google.golang.org/grpc v1.43.0
+	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.27.1
 	sigs.k8s.io/yaml v1.2.0 // indirect
 
