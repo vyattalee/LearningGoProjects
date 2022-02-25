@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/Allenxuxu/stark/pkg/mdns"
+	"github.com/LearningGoProjects/ResourceMonitor/thirdparty/mdns"
 )
 
 func main() {
