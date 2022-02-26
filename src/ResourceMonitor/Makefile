@@ -4,6 +4,9 @@ prepare:
 proto:
 	protoc --proto_path=proto proto/*.proto  --go_out=:pb --go-grpc_out=:pb --grpc-gateway_out=:pb
 
+proto_old:
+	./reference_projects/protobuf-3.11.2/src/protoc --proto_path=proto proto/*.proto  --go_out=:pb --go-grpc_out=:pb --grpc-gateway_out=:pb
+
 clean:
 	rm pb/*
 
