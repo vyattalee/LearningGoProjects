@@ -2,7 +2,4 @@ module github.com/LearningGoProjects/ResourceMonitor/reference_projects/longlive
 
 go 1.16
 
-require (
-	github.com/spf13/viper v1.10.1 // indirect
-	google.golang.org/grpc v1.43.0 // indirect
-)
+require github.com/spf13/viper v1.10.1 // indirect

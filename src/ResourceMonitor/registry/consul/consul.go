@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"net"
 	"net/http"
 	"runtime"
@@ -353,7 +354,7 @@ func (c *consulRegistry) GetService(name string) ([]*registry.Service, error) {
 
 		svc.Nodes = append(svc.Nodes, &registry.Node{
 			Id:       id,
-			Address:  util.HostPort(address, s.Service.Port),
+			Address:  utils.HostPort(address, s.Service.Port),
 			Metadata: s.Service.Meta,
 		})
 	}

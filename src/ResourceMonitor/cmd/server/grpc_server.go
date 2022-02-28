@@ -6,7 +6,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
-	"github.com/LearningGoProjects/ResourceMonitor/registry/etcd"
+	"github.com/LearningGoProjects/ResourceMonitor/registry/consul"
 	"github.com/LearningGoProjects/ResourceMonitor/rpc/server/middleware/ratelimit"
 	"github.com/LearningGoProjects/ResourceMonitor/service"
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
@@ -107,7 +107,8 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 		serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
 	}
 
-	rg, err := etcd.NewRegistry()
+	//rg, err := etcd.NewRegistry()
+	rg, err := consul.NewRegistry()
 	if err != nil {
 		panic(err)
 	}

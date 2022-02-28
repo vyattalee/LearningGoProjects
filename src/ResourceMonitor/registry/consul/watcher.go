@@ -2,6 +2,7 @@ package consul
 
 import (
 	"fmt"
+	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"log"
 	"os"
 	"sync"
@@ -163,7 +164,7 @@ func (cw *consulWatcher) serviceHandler(idx uint64, data interface{}) {
 
 			// it's an update rather than creation
 			if len(nodes) > 0 {
-				delService := util.CopyService(oldService)
+				delService := utils.CopyService(oldService)
 				delService.Nodes = nodes
 				cw.next <- &registry.Result{Action: "delete", Service: delService}
 			}
