@@ -108,6 +108,7 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 	}
 
 	//rg, err := etcd.NewRegistry()
+	//rg, err := mdns.NewRegistry()
 	rg, err := consul.NewRegistry()
 	if err != nil {
 		panic(err)
