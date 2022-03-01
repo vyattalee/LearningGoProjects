@@ -80,3 +80,7 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 		}
 	}
 }
+
+func (s *routeGuideServer) mustEmbedUnimplementedRouteGuideServer() {
+
+}

@@ -11,7 +11,16 @@ import (
 )
 
 func main() {
+	directly := true
+	if directly == true {
+		SubscribeToServerDirectly()
+	} else {
+		SubscribeToServerByServiceName()
+	}
 
+}
+
+func SubscribeToServerDirectly() {
 	var serverAddress, serverType string
 	var endPoint string
 	var enableTLS bool
@@ -65,5 +74,8 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot start server: ", err)
 	}
+}
 
+func SubscribeToServerByServiceName() {
+	runRemodeledGRPCServer(true)
 }

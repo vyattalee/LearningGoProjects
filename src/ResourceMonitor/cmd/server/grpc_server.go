@@ -87,6 +87,55 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.MemoryServiceServer, enableTLS bool, listener net.Listener) error {
 
 	jwtManager := service.NewJWTManager(utils.SecretKey, utils.TokenDuration)
+
+	interceptor := service.NewAuthInterceptor(jwtManager, accessibleRoles())
+	serverOptions := []grpc.ServerOption{
+		grpc.UnaryInterceptor(interceptor.Unary()),
+		grpc.StreamInterceptor(interceptor.Stream()),
+		grpc.ConnectionTimeout(30 * time.Second),
+		grpc.MaxConcurrentStreams(10),
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			MaxConnectionIdle: 5 * time.Minute, //这个连接最大的空闲时间，超过就释放，解决proxy等到网络问题（不通知grpc的client和server）
+		}),
+	}
+
+	if enableTLS {
+		tlsCredentials, err := loadTLSCredentials()
+		if err != nil {
+			return fmt.Errorf("cannot load TLS credentials: %w", err)
+		}
+
+		serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
+	}
+
+	grpcServer := grpc.NewServer(serverOptions...)
+
+	userStore := service.NewInMemoryUserStore()
+	err := seedUsers(userStore)
+	if err != nil {
+		log.Fatal("cannot seed users: ", err)
+	}
+
+	authServer := service.NewAuthServer(userStore, jwtManager)
+	resourceMonitorServer := service.NewResourceMonitorServer()
+
+	// Register the server
+	pb.RegisterAuthServiceServer(grpcServer, authServer)
+	pb.RegisterResourceMonitorServiceServer(grpcServer, resourceMonitorServer)
+	pb.RegisterProcessorsServiceServer(grpcServer, processorsServer)
+	//pb.RegisterMemoryServiceServer(grpcServer, memoryServer)
+	reflection.Register(grpcServer)
+
+	// Start sending data to subscribers
+	go resourceMonitorServer.StartService()
+
+	log.Printf("Start GRPC server at %s, TLS = %t", listener.Addr().String(), enableTLS)
+	return grpcServer.Serve(listener)
+}
+
+func runRemodeledGRPCServer(enableTLS bool) error {
+
+	jwtManager := service.NewJWTManager(utils.SecretKey, utils.TokenDuration)
 	interceptor := service.NewAuthInterceptor(jwtManager, accessibleRoles())
 	serverOptions := []grpc.ServerOption{
 		grpc.UnaryInterceptor(interceptor.Unary()),
@@ -140,20 +189,20 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 	}
 
 	authServer := service.NewAuthServer(userStore, jwtManager)
-	resourceMonitorServer := service.NewResourceMonitorServer()
+	//resourceMonitorServer := service.NewResourceMonitorServer()
+	//rs := registry.NewServer()
 
 	// Register the server
 	pb.RegisterAuthServiceServer(rpcServer.GrpcServer(), authServer)
-	pb.RegisterResourceMonitorServiceServer(rpcServer.GrpcServer(), resourceMonitorServer)
-	pb.RegisterProcessorsServiceServer(rpcServer.GrpcServer(), processorsServer)
+	//pb.RegisterResourceMonitorServiceServer(rpcServer.GrpcServer(), resourceMonitorServer)
+
+	//pb.RegisterRouteGuideServer(rpcServer.GrpcServer(), rs)
 	//pb.RegisterMemoryServiceServer(rpcServer, memoryServer)
 	reflection.Register(rpcServer.GrpcServer())
 
-	// Start sending data to subscribers
-	go resourceMonitorServer.StartService()
+	log.Printf("Start GRPC server based on service name ")
 
-	log.Printf("Start GRPC server at %s, TLS = %t", listener.Addr().String(), enableTLS)
-	return rpcServer.GrpcServer().Serve(listener)
+	return rpcServer.Start()
 }
 
 func seedUsers(userStore service.UserStore) error {
