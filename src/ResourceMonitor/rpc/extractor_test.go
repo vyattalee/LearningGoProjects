@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/LearningGoProjects/ResourceMonitor/registry/routeguide"
+	pb "github.com/LearningGoProjects/ResourceMonitor/pb"
 	"github.com/stretchr/testify/assert"
 )
 

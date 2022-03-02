@@ -2,7 +2,7 @@ module github.com/LearningGoProjects/ResourceMonitor
 
 go 1.16
 
-//replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
+replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
 
 require (
 	github.com/Allenxuxu/ratelimit v0.0.0-20210131080358-1c878c80259b
@@ -32,7 +32,6 @@ require (
 )
 
 require (
-	github.com/Allenxuxu/stark v0.0.0-20211211062413-82b0641cb5aa // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/sys v0.0.0-20220224120231-95c6836cb0e7 // indirect
