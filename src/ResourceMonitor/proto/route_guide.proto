@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = ".;routeguide";
+option go_package = ".;pb";
 
-package routeguide;
+package LearningGoProjects.ResourceMonitor;
 
 // Interface exported by the server.
 service RouteGuide {

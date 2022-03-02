@@ -2,6 +2,7 @@
 package cache
 
 import (
+	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"math"
 	"math/rand"
 	"sync"
@@ -119,7 +120,7 @@ func (c *cache) get(service string) ([]*registry.Service, error) {
 	// get cache ttl
 	ttl := c.ttls[service]
 	// make a copy
-	cp := util.Copy(services)
+	cp := utils.Copy(services)
 
 	// got services && within ttl so return cache
 	if c.isValid(cp, ttl) {
@@ -152,7 +153,7 @@ func (c *cache) get(service string) ([]*registry.Service, error) {
 
 		// cache results
 		c.Lock()
-		c.set(service, util.Copy(services))
+		c.set(service, utils.Copy(services))
 		c.Unlock()
 
 		return services, nil

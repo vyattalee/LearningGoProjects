@@ -5,22 +5,23 @@ import (
 	"fmt"
 	"github.com/LearningGoProjects/ResourceMonitor/conf"
 	"github.com/LearningGoProjects/ResourceMonitor/service"
+	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"github.com/spf13/viper"
 	"log"
 	"net"
 )
 
 func main() {
-	directly := true
-	if directly == true {
-		SubscribeToServerDirectly()
+
+	if utils.Directly == true {
+		ServiceProviderBySubscribeDirectly()
 	} else {
-		SubscribeToServerByServiceName()
+		ServiceProviderByServiceDiscovery()
 	}
 
 }
 
-func SubscribeToServerDirectly() {
+func ServiceProviderBySubscribeDirectly() {
 	var serverAddress, serverType string
 	var endPoint string
 	var enableTLS bool
@@ -76,6 +77,6 @@ func SubscribeToServerDirectly() {
 	}
 }
 
-func SubscribeToServerByServiceName() {
+func ServiceProviderByServiceDiscovery() {
 	runRemodeledGRPCServer(true)
 }

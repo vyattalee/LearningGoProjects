@@ -32,17 +32,10 @@ require (
 )
 
 require (
-	github.com/dustin/go-humanize v1.0.0 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/jonboulle/clockwork v0.2.2 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/Allenxuxu/stark v0.0.0-20211211062413-82b0641cb5aa // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
-	github.com/tmc/grpc-websocket-proxy v0.0.0-20201229170055-e5319fda7802 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	go.etcd.io/bbolt v1.3.5 // indirect
 	golang.org/x/sys v0.0.0-20220224120231-95c6836cb0e7 // indirect
-	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
 //replace github.com/golang/protobuf => github.com/golang/protobuf v1.4.3

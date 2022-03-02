@@ -16,3 +16,7 @@ const (
 	ClientKeyFile    = "cert/client-key.pem"
 	ServerCACertFile = "cert/ca-cert.pem" //client & server on different nodes, it is different ca-cert.pem
 )
+
+const (
+	Directly = true
+)

@@ -9,11 +9,11 @@ import (
 func getStorageInfo() (*pb.Storage, error) {
 
 	partitionsInfos, err1 := disk.Partitions(true) //所有分区
-	//fmt.Println(partitionsInfos)
+	//fmt.Infof(partitionsInfos)
 	//usageInfo, err2 := disk.Usage("~/") //指定某路径的硬盘使用情况
-	//fmt.Println(usageInfo)
+	//fmt.Infof(usageInfo)
 	//ioCountinfo, err3 := disk.IOCounters() //所有硬盘的io信息
-	//fmt.Println(ioCountinfo)
+	//fmt.Infof(ioCountinfo)
 	var err2, err3 error //
 	var usageInfo *disk.UsageStat
 	var ioCountInfo map[string](disk.IOCountersStat)

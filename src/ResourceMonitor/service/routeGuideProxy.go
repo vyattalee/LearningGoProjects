@@ -1,9 +1,9 @@
-package registry
+package service
 
 import (
 	"context"
 
-	pb "github.com/LearningGoProjects/ResourceMonitor/registry/routeguide"
+	"github.com/LearningGoProjects/ResourceMonitor/pb"
 
 	"io"
 	"log"

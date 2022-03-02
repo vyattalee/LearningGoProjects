@@ -21,29 +21,18 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Allenxuxu/ratelimit/tokenbucket"
 	"github.com/LearningGoProjects/ResourceMonitor/registry"
 	"github.com/LearningGoProjects/ResourceMonitor/rest"
-	restSelector "github.com/LearningGoProjects/ResourceMonitor/rest/client/selector"
 	"github.com/LearningGoProjects/ResourceMonitor/rpc"
-	rpcSelector "github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
-
-	"github.com/Allenxuxu/ratelimit/tokenbucket"
 )
 
 func NewRPCServer(rg registry.Registry, opt ...rpc.ServerOption) *rpc.Server {
 	return rpc.NewServer(rg, opt...)
 }
 
-func NewRPCClient(name string, s rpcSelector.Selector, opt ...rpc.ClientOption) (*rpc.Client, error) {
-	return rpc.NewClient(name, s, opt...)
-}
-
 func NewRestServer(rg registry.Registry, handler http.Handler, opts ...rest.ServerOption) *rest.Server {
 	return rest.NewSever(rg, handler, opts...)
-}
-
-func NewRestClient(name string, s restSelector.Selector, opt ...rest.ClientOption) (*rest.Client, error) {
-	return rest.NewClient(name, s, opt...)
 }
 
 func interceptorFun(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
@@ -156,9 +145,9 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 		serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
 	}
 
+	rg, err := consul.NewRegistry()
 	//rg, err := etcd.NewRegistry()
 	//rg, err := mdns.NewRegistry()
-	rg, err := consul.NewRegistry()
 	if err != nil {
 		panic(err)
 	}
@@ -190,7 +179,7 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 
 	authServer := service.NewAuthServer(userStore, jwtManager)
 	//resourceMonitorServer := service.NewResourceMonitorServer()
-	//rs := registry.NewServer()
+	//rs := service.NewServer()
 
 	// Register the server
 	pb.RegisterAuthServiceServer(rpcServer.GrpcServer(), authServer)
@@ -200,8 +189,7 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 	//pb.RegisterMemoryServiceServer(rpcServer, memoryServer)
 	reflection.Register(rpcServer.GrpcServer())
 
-	log.Printf("Start GRPC server based on service name ")
-
+	//log.Printf("Start GRPC server based on service name ")
 	return rpcServer.Start()
 }
 
