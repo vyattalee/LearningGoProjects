@@ -214,7 +214,11 @@ func accessibleRoles() map[string][]string {
 	const resourceMonitorServicePath = "/LearningGoProjects.ResourceMonitor.ResourceMonitorService.Server/"
 
 	return map[string][]string{
-		resourceMonitorServicePath + "Subscribe":   {"admin", "user"},
-		resourceMonitorServicePath + "Unsubscribe": {"admin", "user"},
+		resourceMonitorServicePath + "Subscribe":    {"admin", "user"},
+		resourceMonitorServicePath + "Unsubscribe":  {"admin", "user"},
+		resourceMonitorServicePath + "RouteChat":    {"admin", "user"},
+		resourceMonitorServicePath + "RecordRoute":  {"admin", "user"},
+		resourceMonitorServicePath + "GetFeature":   {"admin", "user"},
+		resourceMonitorServicePath + "ListFeatures": {"admin", "user"},
 	}
 }

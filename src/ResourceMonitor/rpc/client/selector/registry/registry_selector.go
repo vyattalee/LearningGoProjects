@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-const scheme = "vyatta-registry"
+const scheme = "stark-registry"
 
 var _selector atomic.Value
 

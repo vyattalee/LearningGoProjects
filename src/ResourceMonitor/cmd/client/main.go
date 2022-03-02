@@ -14,7 +14,6 @@ import (
 	"github.com/LearningGoProjects/ResourceMonitor/rpc"
 	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/balancer"
 	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
-
 	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector/registry"
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
 	"github.com/spf13/viper"
@@ -58,7 +57,7 @@ func main() {
 	if utils.DirectlySubscribing == true {
 		SubscribeToServerDirectly()
 	} else {
-		SubscribeToServerByServcieDiscovery()
+		SubscribeToServerByServcieDiscovery(true)
 	}
 
 }
@@ -163,7 +162,7 @@ func SubscribeToServerDirectly() {
 	log.Infof("Resource Monitor Finished! ")
 }
 
-func SubscribeToServerByServcieDiscovery() {
+func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 	rg, err := consul.NewRegistry()
 	//rg, err := mdns.NewRegistry()
 	//rg, err := etcd.NewRegistry()
@@ -171,15 +170,27 @@ func SubscribeToServerByServcieDiscovery() {
 		panic(err)
 	}
 
-	s, err := registry.NewSelector(rg,
-		selector.BalancerName(balancer.RoundRobin) /**/)
+	s, err := registry.NewSelector(rg, selector.BalancerName(balancer.RoundRobin))
+	/*selector.BalancerName(balancer.RoundRobin) */
 	if err != nil {
 		panic(err)
 	}
 
+	log.Infof("registry.NewSelector ", rg.String(), s.Address("ResourceMonitor.CPU"), err)
+
+	transportOption := grpc.WithInsecure()
+	if enableTLS {
+		tlsCredentials, err := loadTLSCredentials()
+		if err != nil {
+			log.Fatal("cannot load TLS credentials: ", err)
+		}
+
+		transportOption = grpc.WithTransportCredentials(tlsCredentials)
+	}
+
 	client, err := NewRPCClient("ResourceMonitor.CPU", s,
 		rpc.GrpcDialOption(
-			grpc.WithInsecure(),
+			transportOption,
 		),
 	)
 	if err != nil {

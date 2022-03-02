@@ -59,6 +59,7 @@ func (c *Client) Conn() *grpc.ClientConn {
 func (c *Client) connect() (err error) {
 	timeCtx, cancel := context.WithTimeout(context.Background(), c.opts.Timeout)
 	defer cancel()
+	fmt.Println("c.selector.Address:", c.name)
 	c.conn, err = grpc.DialContext(timeCtx, c.selector.Address(c.name), c.opts.GrpcOpts...)
 	if err != nil {
 		return fmt.Errorf("connect to %s error: %v", c.selector.Address(c.name), err)
