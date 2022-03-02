@@ -177,19 +177,20 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 		log.Fatal("cannot seed users: ", err)
 	}
 
+	//define new service
 	authServer := service.NewAuthServer(userStore, jwtManager)
 	//resourceMonitorServer := service.NewResourceMonitorServer()
-	//rs := service.NewServer()
+	rs := service.NewServer()
 
 	// Register the server
 	pb.RegisterAuthServiceServer(rpcServer.GrpcServer(), authServer)
 	//pb.RegisterResourceMonitorServiceServer(rpcServer.GrpcServer(), resourceMonitorServer)
+	pb.RegisterRouteGuideServer(rpcServer.GrpcServer(), rs)
 
-	//pb.RegisterRouteGuideServer(rpcServer.GrpcServer(), rs)
 	//pb.RegisterMemoryServiceServer(rpcServer, memoryServer)
 	reflection.Register(rpcServer.GrpcServer())
 
-	//log.Printf("Start GRPC server based on service name ")
+	log.Printf("Start GRPC server based on service name ")
 	return rpcServer.Start()
 }
 

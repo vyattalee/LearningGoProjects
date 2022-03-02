@@ -13,7 +13,7 @@ import (
 
 func main() {
 
-	if utils.Directly == true {
+	if utils.DirectlySubscribing == true {
 		ServiceProviderBySubscribeDirectly()
 	} else {
 		ServiceProviderByServiceDiscovery()
@@ -78,5 +78,8 @@ func ServiceProviderBySubscribeDirectly() {
 }
 
 func ServiceProviderByServiceDiscovery() {
-	runRemodeledGRPCServer(true)
+	err := runRemodeledGRPCServer(true)
+	if err != nil {
+		log.Fatal("cannot start ServiceProviderByServiceDiscovery server: ", err)
+	}
 }

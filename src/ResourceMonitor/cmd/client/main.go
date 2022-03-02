@@ -12,6 +12,8 @@ import (
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
 	"github.com/LearningGoProjects/ResourceMonitor/registry/consul"
 	"github.com/LearningGoProjects/ResourceMonitor/rpc"
+	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/balancer"
+	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
 
 	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector/registry"
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
@@ -53,7 +55,7 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 
 func main() {
 
-	if utils.Directly == true {
+	if utils.DirectlySubscribing == true {
 		SubscribeToServerDirectly()
 	} else {
 		SubscribeToServerByServcieDiscovery()
@@ -169,8 +171,8 @@ func SubscribeToServerByServcieDiscovery() {
 		panic(err)
 	}
 
-	s, err := registry.NewSelector(rg
-	/*selector.BalancerName(balancer.RoundRobin),*/)
+	s, err := registry.NewSelector(rg,
+		selector.BalancerName(balancer.RoundRobin) /**/)
 	if err != nil {
 		panic(err)
 	}

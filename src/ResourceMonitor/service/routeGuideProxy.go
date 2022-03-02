@@ -10,7 +10,9 @@ import (
 	"time"
 )
 
-type routeGuideServer struct{}
+type routeGuideServer struct {
+	pb.UnimplementedRouteGuideServer
+}
 
 func NewServer() *routeGuideServer {
 	return &routeGuideServer{}
@@ -81,6 +83,6 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 	}
 }
 
-func (s *routeGuideServer) mustEmbedUnimplementedRouteGuideServer() {
-
-}
+//func (s *routeGuideServer) mustEmbedUnimplementedRouteGuideServer() {
+//
+//}
