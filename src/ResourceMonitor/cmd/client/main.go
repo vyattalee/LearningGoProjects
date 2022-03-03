@@ -179,14 +179,24 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 	log.Infof("registry.NewSelector ", rg.String(), s.Address("ResourceMonitor.CPU"), err)
 
 	transportOption := grpc.WithInsecure()
-	if enableTLS {
-		tlsCredentials, err := loadTLSCredentials()
-		if err != nil {
-			log.Fatal("cannot load TLS credentials: ", err)
-		}
+	//if enableTLS {
+	//	tlsCredentials, err := loadTLSCredentials()
+	//	if err != nil {
+	//		log.Fatal("cannot load TLS credentials: ", err)
+	//	}
+	//
+	//	transportOption = grpc.WithTransportCredentials(tlsCredentials)
+	//}
 
-		transportOption = grpc.WithTransportCredentials(tlsCredentials)
-	}
+	//authClient := client.NewAuthClient(conn, username, password)
+	//interceptor, err := client.NewAuthInterceptor(authClient, authMethods(), refreshDuration)
+	//if err != nil {
+	//	log.Fatal("cannot create auth interceptor: ", err)
+	//}
+	//
+	//transportOption = append(transportOption,
+	//	grpc.WithUnaryInterceptor(interceptor.Unary()),
+	//	grpc.WithStreamInterceptor(interceptor.Stream()))
 
 	client, err := NewRPCClient("ResourceMonitor.CPU", s,
 		rpc.GrpcDialOption(

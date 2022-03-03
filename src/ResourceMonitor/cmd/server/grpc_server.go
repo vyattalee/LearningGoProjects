@@ -124,26 +124,26 @@ func runGRPCServer(processorsServer pb.ProcessorsServiceServer, memoryServer pb.
 
 func runRemodeledGRPCServer(enableTLS bool) error {
 
-	jwtManager := service.NewJWTManager(utils.SecretKey, utils.TokenDuration)
-	interceptor := service.NewAuthInterceptor(jwtManager, accessibleRoles())
-	serverOptions := []grpc.ServerOption{
-		grpc.UnaryInterceptor(interceptor.Unary()),
-		grpc.StreamInterceptor(interceptor.Stream()),
-		grpc.ConnectionTimeout(30 * time.Second),
-		grpc.MaxConcurrentStreams(10),
-		grpc.KeepaliveParams(keepalive.ServerParameters{
-			MaxConnectionIdle: 5 * time.Minute, //这个连接最大的空闲时间，超过就释放，解决proxy等到网络问题（不通知grpc的client和server）
-		}),
-	}
-
-	if enableTLS {
-		tlsCredentials, err := loadTLSCredentials()
-		if err != nil {
-			return fmt.Errorf("cannot load TLS credentials: %w", err)
-		}
-
-		serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
-	}
+	//jwtManager := service.NewJWTManager(utils.SecretKey, utils.TokenDuration)
+	//interceptor := service.NewAuthInterceptor(jwtManager, accessibleRoles())
+	//serverOptions := []grpc.ServerOption{
+	//	grpc.UnaryInterceptor(interceptor.Unary()),
+	//	grpc.StreamInterceptor(interceptor.Stream()),
+	//	grpc.ConnectionTimeout(30 * time.Second),
+	//	grpc.MaxConcurrentStreams(10),
+	//	grpc.KeepaliveParams(keepalive.ServerParameters{
+	//		MaxConnectionIdle: 5 * time.Minute, //这个连接最大的空闲时间，超过就释放，解决proxy等到网络问题（不通知grpc的client和server）
+	//	}),
+	//}
+	//
+	//if enableTLS {
+	//	tlsCredentials, err := loadTLSCredentials()
+	//	if err != nil {
+	//		return fmt.Errorf("cannot load TLS credentials: %w", err)
+	//	}
+	//
+	//	serverOptions = append(serverOptions, grpc.Creds(tlsCredentials))
+	//}
 
 	rg, err := consul.NewRegistry()
 	//rg, err := etcd.NewRegistry()
@@ -168,22 +168,22 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 			ratelimit.StreamServerInterceptor(tokenbucket.New(10, 10)),
 		),
 
-		rpc.GrpcOpts(serverOptions),
+		//rpc.GrpcOpts(serverOptions),
 	)
 
-	userStore := service.NewInMemoryUserStore()
-	err = seedUsers(userStore)
-	if err != nil {
-		log.Fatal("cannot seed users: ", err)
-	}
+	//userStore := service.NewInMemoryUserStore()
+	//err = seedUsers(userStore)
+	//if err != nil {
+	//	log.Fatal("cannot seed users: ", err)
+	//}
 
 	//define new service
-	authServer := service.NewAuthServer(userStore, jwtManager)
+	//authServer := service.NewAuthServer(userStore, jwtManager)
 	//resourceMonitorServer := service.NewResourceMonitorServer()
 	rs := service.NewServer()
 
 	// Register the server
-	pb.RegisterAuthServiceServer(rpcServer.GrpcServer(), authServer)
+	//pb.RegisterAuthServiceServer(rpcServer.GrpcServer(), authServer)
 	//pb.RegisterResourceMonitorServiceServer(rpcServer.GrpcServer(), resourceMonitorServer)
 	pb.RegisterRouteGuideServer(rpcServer.GrpcServer(), rs)
 
