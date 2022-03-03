@@ -198,7 +198,7 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 	//	grpc.WithUnaryInterceptor(interceptor.Unary()),
 	//	grpc.WithStreamInterceptor(interceptor.Stream()))
 
-	client, err := NewRPCClient("ResourceMonitor.CPU", s,
+	client, err := NewRPCClient("ResourceMonitor", s,
 		rpc.GrpcDialOption(
 			transportOption,
 		),

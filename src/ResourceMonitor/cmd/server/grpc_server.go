@@ -153,7 +153,7 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 	}
 
 	rpcServer := NewRPCServer(rg,
-		rpc.Name("ResourceMonitor.CPU"),
+		rpc.Name("ResourceMonitor"),
 		rpc.Version("v1.0.0"),
 		rpc.Metadata(map[string]string{
 			"server":           "rpc",
