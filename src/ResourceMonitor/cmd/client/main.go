@@ -228,17 +228,17 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 	}
 
 	for {
-		if err := stream.Send(&pb.RouteNote{
-			Location: &pb.Point{
-				Latitude:  1,
-				Longitude: 1,
-			},
-			Message: "hello @ " + time.Now().String(),
-		}); err != nil {
-			panic(err)
-		}
+		//if err := stream.Send(&pb.RouteNote{
+		//	Location: &pb.Point{
+		//		Latitude:  1,
+		//		Longitude: 1,
+		//	},
+		//	Message: "hello @ " + time.Now().String(),
+		//}); err != nil {
+		//	panic(err)
+		//}
 
-		in, err := stream.Recv()
+		resp, err := stream.Recv()
 		if err == io.EOF {
 			panic(err)
 
@@ -247,7 +247,7 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 			panic(err)
 		}
 
-		time.Sleep(time.Second * 5)
-		log.Infof("[RouteChat] %v received at client @: %s", in, time.Now().String())
+		//time.Sleep(time.Second * 5)
+		log.Infof("[RouteChat] %v received at client @: %s", resp, time.Now().String())
 	}
 }
