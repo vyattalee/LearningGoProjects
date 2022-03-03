@@ -247,7 +247,7 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 			panic(err)
 		}
 
-		//time.Sleep(time.Second * 5)
-		log.Infof("[RouteChat] %v received at client @: %s", resp, time.Now().String())
+		time.Sleep(time.Second * 5)
+		log.Infof("[RouteChat] %v received at client @: %s \r\n", resp, time.Now().String())
 	}
 }

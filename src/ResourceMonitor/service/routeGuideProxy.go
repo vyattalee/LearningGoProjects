@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
 
 	"io"
@@ -64,19 +63,26 @@ func (s *routeGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) e
 
 func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error {
 	for {
-		in, err := stream.Recv()
-		if err == io.EOF {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
+		//in, err := stream.Recv()
+		//if err == io.EOF {
+		//	return nil
+		//}
+		//if err != nil {
+		//	return err
+		//}
 
-		log.Printf("[RouteChat] %v", in)
+		//log.Printf("[RouteChat] %v", in)
+
+		//var byteData []byte
+		storage, _ := getStorageInfo()
+		//byteData, err = json.Marshal(storage)
+		//if err != nil {
+		//	log.Printf("getStorageInfo() error:", err)
+		//}
 
 		if err := stream.Send(&pb.RouteNote{
-			Location: in.Location,
-			Message:  "reply " + in.Message,
+			//Location: in.Location,
+			Message: storage.String(),
 		}); err != nil {
 			return err
 		}
