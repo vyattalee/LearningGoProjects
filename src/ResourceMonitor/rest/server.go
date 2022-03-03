@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	DefaultName    = "stark.http.server"
+	DefaultName    = "resourceMonitor.http.server"
 	DefaultVersion = time.Now().Format("2006.01.02.15.04")
 	DefaultId      = uuid.New().String()
 	DefaultAddress = ":0"

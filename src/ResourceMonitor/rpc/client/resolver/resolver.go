@@ -30,7 +30,7 @@ func (d *builder) Build(target resolver.Target, cc resolver.ClientConn, opts res
 		return nil, errors.New("grpc resolver selector is nil")
 	}
 
-	sr := &starkResolver{
+	sr := &resourceMonitorResolver{
 		selector: s,
 		cc:       cc,
 		service:  target.Endpoint,
@@ -47,14 +47,14 @@ func (d *builder) Scheme() string {
 	return d.scheme
 }
 
-type starkResolver struct {
+type resourceMonitorResolver struct {
 	selector selector.Selector
 	cc       resolver.ClientConn
 	watcher  registry.Watcher
 	service  string
 }
 
-func (r *starkResolver) run() (err error) {
+func (r *resourceMonitorResolver) run() (err error) {
 	if err = r.updateState(); err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (r *starkResolver) run() (err error) {
 			}
 
 			if err := r.updateState(); err != nil {
-				log.Errorf("stark resolver update state error: %v", err)
+				log.Errorf("resource monitor resolver update state error: %v", err)
 			}
 		}
 	}()
@@ -86,7 +86,7 @@ func (r *starkResolver) run() (err error) {
 	return nil
 }
 
-func (r *starkResolver) updateState() error {
+func (r *resourceMonitorResolver) updateState() error {
 	services, err := r.selector.GetService(r.service)
 	if err != nil {
 		return err
@@ -103,7 +103,7 @@ func (r *starkResolver) updateState() error {
 	return nil
 }
 
-func (r *starkResolver) Close() {
+func (r *resourceMonitorResolver) Close() {
 	if r.watcher != nil {
 		r.watcher.Stop()
 	}
@@ -112,4 +112,4 @@ func (r *starkResolver) Close() {
 	}
 }
 
-func (r *starkResolver) ResolveNow(options resolver.ResolveNowOptions) {}
+func (r *resourceMonitorResolver) ResolveNow(options resolver.ResolveNowOptions) {}

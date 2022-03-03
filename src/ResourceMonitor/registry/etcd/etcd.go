@@ -23,7 +23,7 @@ var (
 	DefaultAddr    = "127.0.0.1:2379"
 	DefaultTimeout = 5 * time.Second
 
-	defaultPrefix = "/stark/registry/"
+	defaultPrefix = "/resourceMonitorService/registry/"
 )
 
 type etcdRegistry struct {

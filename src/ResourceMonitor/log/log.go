@@ -35,7 +35,7 @@ var (
 )
 
 func init() {
-	prefix = "[stark]"
+	prefix = "[ResourceMonitor]"
 
 	switch os.Getenv(StarkLogLevel) {
 	case "trace":

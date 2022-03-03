@@ -10,14 +10,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/LearningGoProjects/ResourceMonitor/thirdparty/mdns"
 	"github.com/LearningGoProjects/ResourceMonitor/registry"
+	"github.com/LearningGoProjects/ResourceMonitor/thirdparty/mdns"
 	"github.com/google/uuid"
 )
 
 var (
-	// use a .stark domain rather than .local
-	mdnsDomain = "stark"
+	// use a .resourceMonitor domain rather than .local
+	mdnsDomain = "resourceMonitorService"
 )
 
 type mdnsTxt struct {

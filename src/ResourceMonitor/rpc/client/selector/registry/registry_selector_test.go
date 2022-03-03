@@ -86,9 +86,9 @@ func TestRegistrySelectorFilter(t *testing.T) {
 }
 
 func Test_schema(t *testing.T) {
-	_, err := url.Parse(fmt.Sprintf("%s:///%s", "stark_registry", "test"))
+	_, err := url.Parse(fmt.Sprintf("%s:///%s", "resourceMonitor_registry", "test"))
 	assert.Error(t, err)
 
-	_, err = url.Parse(fmt.Sprintf("%s:///%s", "stark-registry", "test"))
+	_, err = url.Parse(fmt.Sprintf("%s:///%s", "resourceMonitor-registry", "test"))
 	assert.NoError(t, err)
 }

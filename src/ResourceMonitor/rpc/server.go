@@ -21,7 +21,7 @@ import (
 
 var (
 	DefaultAddress          = ":0"
-	DefaultName             = "stark.rpc.server"
+	DefaultName             = "resourceMonitor.rpc.server"
 	DefaultVersion          = time.Now().Format("2006.01.02.15.04")
 	DefaultId               = uuid.New().String()
 	DefaultRegisterInterval = time.Second * 30

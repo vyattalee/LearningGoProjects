@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-const scheme = "stark-static"
+const scheme = "resourceMonitorService-static"
 
 var _selector atomic.Value
 
