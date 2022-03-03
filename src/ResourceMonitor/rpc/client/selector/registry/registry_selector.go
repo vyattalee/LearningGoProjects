@@ -12,7 +12,8 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-const scheme = "stark-registry"
+//uppercase NOT allowed
+const scheme = "resource-monitor-registry"
 
 var _selector atomic.Value
 
