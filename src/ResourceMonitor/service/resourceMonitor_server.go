@@ -237,7 +237,7 @@ func (server *ResourceMonitorServer) MemoryInfoCollectAndSend(byteData []byte, e
 }
 
 func (server *ResourceMonitorServer) StoreInfoCollectAndSend(byteData []byte, sub sub, id int32) {
-	storage, err := getStorageInfo()
+	storage, err := GetStorageInfo()
 
 	resource := &pb.Response_Storage{
 		//Storage: &pb.Storage{

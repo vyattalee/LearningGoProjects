@@ -6,7 +6,7 @@ import (
 	"github.com/shirou/gopsutil/disk"
 )
 
-func getStorageInfo() (*pb.Storage, error) {
+func GetStorageInfo() (*pb.Storage, error) {
 
 	partitionsInfos, err1 := disk.Partitions(true) //所有分区
 	//fmt.Infof(partitionsInfos)

@@ -9,7 +9,7 @@ message Memory {
   uint64 total = 3;
   uint64 available = 4;
   uint64 used = 5;
-  float usedPercent = 6;
+  double usedPercent = 6;
   uint64 free = 7;
   uint64 active = 8;
 

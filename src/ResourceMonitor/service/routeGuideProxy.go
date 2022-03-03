@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
+	//"github.com/shirou/gopsutil/cpu"
 
 	"io"
 	"log"
@@ -74,15 +75,19 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 		//log.Printf("[RouteChat] %v", in)
 
 		//var byteData []byte
-		storage, _ := getStorageInfo()
+		storage, _ := GetStorageInfo()
 		//byteData, err = json.Marshal(storage)
 		//if err != nil {
-		//	log.Printf("getStorageInfo() error:", err)
+		//	log.Printf("GetStorageInfo() error:", err)
 		//}
+
+		cpu, _ := CollectCPUGPUResource()
+
+		mem, _ := GetMemoryInfo()
 
 		if err := stream.Send(&pb.RouteNote{
 			//Location: in.Location,
-			Message: storage.String(),
+			Message: storage.String() + cpu[0].String() + mem.String(),
 		}); err != nil {
 			return err
 		}

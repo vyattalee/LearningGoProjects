@@ -63,3 +63,20 @@ func (server *MemoryServer) GetMemoryInfo(
 	res := &pb.GetMemoryResponse{Mem: mm}
 	return res, nil
 }
+
+// CreateLaptop is a unary RPC to create a new laptop
+func GetMemoryInfo() (*pb.Memory, error) {
+
+	info, err := mem.VirtualMemory()
+
+	res := &pb.Memory{
+		Total:       info.Total,
+		Available:   info.Available,
+		Used:        info.Used,
+		UsedPercent: info.UsedPercent,
+		Free:        info.Free,
+		Active:      info.Active,
+	}
+
+	return res, err
+}
