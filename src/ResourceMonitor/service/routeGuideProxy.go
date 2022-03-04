@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/LearningGoProjects/ResourceMonitor/pb"
 	//"github.com/shirou/gopsutil/cpu"
 
@@ -82,12 +83,13 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 		//}
 
 		cpu, _ := CollectCPUGPUResource()
+		j4cpu, _ := json.Marshal(cpu)
 
 		mem, _ := GetMemoryInfo()
 
 		if err := stream.Send(&pb.RouteNote{
 			//Location: in.Location,
-			Message: storage.String() + cpu[0].String() + mem.String(),
+			Message: storage.String() + string(j4cpu) + mem.String(),
 		}); err != nil {
 			return err
 		}

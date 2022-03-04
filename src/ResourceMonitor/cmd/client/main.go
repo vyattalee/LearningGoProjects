@@ -206,23 +206,25 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 	if err != nil {
 		panic(err)
 	}
-	c := pb.NewRouteGuideClient(client.Conn())
+	c := pb.NewResourceMonitorServiceClient(client.Conn())
 
-	for i := 0; i < 20; i++ {
-		resp, err := c.GetFeature(context.Background(), &pb.Point{
-			Latitude:  int32(i),
-			Longitude: int32(i),
-		})
-		if err != nil {
-			log.Error(err)
-			time.Sleep(time.Second)
-			continue
+	//c := pb.NewRouteGuideClient(client.Conn())
+	var services = []string{"processor", "memory", "storage"}
+	var sub_services *utils.BitMap
+
+	for _, sub_service := range services {
+		//log.Printf("^^^^^^^^^^^^^^ %v", sub_service)
+		if sub_service == "processor" {
+			sub_services.Set(int(pb.ServiceType_ProcessorService))
+		} else if sub_service == "memory" {
+			sub_services.Set(int(pb.ServiceType_MemoryService))
+		} else if sub_service == "storage" {
+			sub_services.Set(int(pb.ServiceType_StorageService))
 		}
-
-		fmt.Println(i, resp.Name, resp.Location.Latitude, resp.Location.Longitude)
 	}
-
-	stream, err := c.RouteChat(context.Background())
+	//stream, err := c.RouteChat(context.Background())
+	stream, err := c.Subscribe(context.Background(),
+		&pb.Request{Id: 1, Filter: &pb.Filter{SubService: sub_services.Bytes()}})
 	if err != nil {
 		panic(err)
 	}

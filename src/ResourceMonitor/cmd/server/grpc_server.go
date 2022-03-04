@@ -179,13 +179,14 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 
 	//define new service
 	//authServer := service.NewAuthServer(userStore, jwtManager)
-	//resourceMonitorServer := service.NewResourceMonitorServer()
-	rs := service.NewServer()
+	resourceMonitorServer := service.NewResourceMonitorServer()
+
+	//rs := service.NewServer()
 
 	// Register the server
 	//pb.RegisterAuthServiceServer(rpcServer.GrpcServer(), authServer)
-	//pb.RegisterResourceMonitorServiceServer(rpcServer.GrpcServer(), resourceMonitorServer)
-	pb.RegisterRouteGuideServer(rpcServer.GrpcServer(), rs)
+	pb.RegisterResourceMonitorServiceServer(rpcServer.GrpcServer(), resourceMonitorServer)
+	//pb.RegisterRouteGuideServer(rpcServer.GrpcServer(), rs)
 
 	//pb.RegisterMemoryServiceServer(rpcServer, memoryServer)
 	reflection.Register(rpcServer.GrpcServer())

@@ -22,6 +22,7 @@ type ResourceMonitorServer struct {
 
 // NewProcessorsServer returns a new ProcessorsServer
 func NewResourceMonitorServer() *ResourceMonitorServer {
+	// Save the subscriber stream according to the given client ID
 	return &ResourceMonitorServer{ticker: time.NewTicker(5 * time.Second)}
 }
 
