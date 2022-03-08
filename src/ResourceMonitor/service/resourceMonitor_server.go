@@ -107,6 +107,29 @@ func (server *ResourceMonitorServer) StartService() {
 	}
 }
 
+func (server *ResourceMonitorServer) DoJobs() {
+	log.Println("Starting resource monitor background service")
+	for {
+		//time.Sleep(time.Second)
+
+		quit := make(chan struct{})
+		//waitResponse := make(chan error)
+
+		select {
+		default:
+			// do stuff
+			log.Println("begin to do ticker stuff")
+			server.doTickerJobs(quit)
+
+		case <-quit:
+			server.ticker.Stop()
+			break
+
+		}
+
+	}
+}
+
 func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 
 	// A list of clients to unsubscribe in case of error

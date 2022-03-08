@@ -32,7 +32,7 @@ type Server struct {
 	opts      *ServerOptions
 	registry  registry.Registry
 	grpcSever *grpc.Server
-	service   *registry.Service
+	service   *registry.Service //service discovery
 	exit      chan struct{}
 }
 

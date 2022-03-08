@@ -192,6 +192,10 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 	reflection.Register(rpcServer.GrpcServer())
 
 	log.Printf("Start GRPC server based on service name ")
+
+	// Start sending data to subscribers
+	go resourceMonitorServer.DoJobs()
+
 	return rpcServer.Start()
 }
 

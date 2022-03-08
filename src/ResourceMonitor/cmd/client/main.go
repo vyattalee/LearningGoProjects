@@ -210,7 +210,7 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 
 	//c := pb.NewRouteGuideClient(client.Conn())
 	var services = []string{"processor", "memory", "storage"}
-	var sub_services *utils.BitMap
+	sub_services := utils.NewBitMap(8)
 
 	for _, sub_service := range services {
 		//log.Printf("^^^^^^^^^^^^^^ %v", sub_service)
@@ -230,15 +230,6 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 	}
 
 	for {
-		//if err := stream.Send(&pb.RouteNote{
-		//	Location: &pb.Point{
-		//		Latitude:  1,
-		//		Longitude: 1,
-		//	},
-		//	Message: "hello @ " + time.Now().String(),
-		//}); err != nil {
-		//	panic(err)
-		//}
 
 		resp, err := stream.Recv()
 		if err == io.EOF {
