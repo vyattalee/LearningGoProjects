@@ -56,6 +56,7 @@ func (server *ResourceMonitorServer) Subscribe(
 			log.Printf("Closing stream for client ID: %d", req.Id)
 			return nil
 		case <-ctx.Done():
+			fin <- true
 			log.Printf("Client ID %d has disconnected", req.Id)
 			return nil
 		}
@@ -118,7 +119,7 @@ func (server *ResourceMonitorServer) DoJobs() {
 		select {
 		default:
 			// do stuff
-			log.Println("begin to do ticker stuff")
+
 			server.doTickerJobs(quit)
 
 		case <-quit:
@@ -151,57 +152,71 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 			return false
 		}
 
+		log.Println("begin to do ticker stuff")
+
 		var err error
 		var cpu []*pb.CPU
 		var byteData []byte
 
 		log.Println("$$$$$$$$$$$$$client:", id, "	subscribe services:", sub.sub_services.String())
 
-		//switch {
-		//case sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet:
-		if sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet {
+		ctx := sub.stream.Context()
+		// Keep this scope alive because once this scope exits - the stream is closed
+		select {
 
-			log.Println("sub.sub_services.Bit(int(pb.ServiceType_ProcessorService))")
-			server.ProcessorInfoCollectAndSend(cpu, err, byteData, sub, id)
+		case <-ctx.Done():
+			sub.finished <- true
+			log.Printf("Client ID %d has disconnected", id)
+			return false
+		default:
 
-		}
+			//switch {
+			//case sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet:
+			if sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet {
 
-		//case sub.sub_services.Bit(int(pb.ServiceType_MemoryService)) == utils.IsSet:
-		if sub.sub_services.Bit(int(pb.ServiceType_MemoryService)) == utils.IsSet {
-			log.Println("sub.sub_services.Bit(int(pb.ServiceType_MemoryService))")
-			server.MemoryInfoCollectAndSend(byteData, err, sub, id)
-		}
+				log.Println("sub.sub_services.Bit(int(pb.ServiceType_ProcessorService))")
+				server.ProcessorInfoCollectAndSend(cpu, err, byteData, sub, id)
 
-		//case sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet:
-		if sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet {
-			//default:
-			log.Println("sub.sub_services.Bit(int(pb.ServiceType_StorageService))")
-
-			server.StoreInfoCollectAndSend(byteData, sub, id)
-		}
-
-		//}  //end of switch
-
-		//whether Can it be integrated into the following single function
-		//if err = sub.stream.Send(&pb.Response{
-		//	ResourceData: fmt.Sprintf("data mock for: %d", id),
-		//	Resource: func()*pb.{
-		//		return "anonymous stringy\n"
-		//	};},
-		//}); err != nil {
-		if err != nil {
-			//if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
-			log.Printf("Failed to send data to client: %v", err)
-			select {
-			case sub.finished <- true:
-				log.Printf("Unsubscribed client: %d", id)
-			default:
-				// Default case is to avoid blocking in case client has already unsubscribed
 			}
-			// In case of error the client would re-subscribe so close the subscriber stream
-			unsubscribe = append(unsubscribe, id)
+
+			//case sub.sub_services.Bit(int(pb.ServiceType_MemoryService)) == utils.IsSet:
+			if sub.sub_services.Bit(int(pb.ServiceType_MemoryService)) == utils.IsSet {
+				log.Println("sub.sub_services.Bit(int(pb.ServiceType_MemoryService))")
+				server.MemoryInfoCollectAndSend(byteData, err, sub, id)
+			}
+
+			//case sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet:
+			if sub.sub_services.Bit(int(pb.ServiceType_StorageService)) == utils.IsSet {
+				//default:
+				log.Println("sub.sub_services.Bit(int(pb.ServiceType_StorageService))")
+
+				server.StoreInfoCollectAndSend(byteData, sub, id)
+			}
+
+			//}  //end of switch
+
+			//whether Can it be integrated into the following single function
+			//if err = sub.stream.Send(&pb.Response{
+			//	ResourceData: fmt.Sprintf("data mock for: %d", id),
+			//	Resource: func()*pb.{
+			//		return "anonymous stringy\n"
+			//	};},
+			//}); err != nil {
+			//if err != nil {
+			//	//if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
+			//	log.Printf("Failed to send data to client: %v", err)
+			//	select {
+			//	case sub.finished <- true:
+			//		log.Printf("Unsubscribed client: %d", id)
+			//	default:
+			//		// Default case is to avoid blocking in case client has already unsubscribed
+			//	}
+			//	// In case of error the client would re-subscribe so close the subscriber stream
+			//	unsubscribe = append(unsubscribe, id)
+			//}
 		}
 		return true
+
 	})
 
 	// Unsubscribe erroneous client streams
@@ -227,11 +242,22 @@ func (server *ResourceMonitorServer) ProcessorInfoCollectAndSend(cpu []*pb.CPU, 
 		TypeUrl: "anyResourceData_cpu",
 		Value:   byteData,
 	}
-	err = sub.stream.Send(&pb.Response{
+
+	if err = sub.stream.Send(&pb.Response{
 		ResourceData:    fmt.Sprintf("data mock for: %d", id),
 		Resource:        resource,
 		AnyResourceData: resourceData,
-	})
+	}); err != nil {
+		log.Printf("Failed to send processor information to client: %v", err)
+		select {
+		case sub.finished <- true:
+			log.Printf("Unsubscribed client: %d", id)
+		default:
+			// Default case is to avoid blocking in case client has already unsubscribed
+		}
+		// In case of error the client would re-subscribe so close the subscriber stream
+		//unsubscribe = append(unsubscribe, id)
+	}
 	//fallthrough
 	return err, byteData, false, false
 }
@@ -251,11 +277,22 @@ func (server *ResourceMonitorServer) MemoryInfoCollectAndSend(byteData []byte, e
 		TypeUrl: "anyResourceData_memory",
 		Value:   byteData,
 	}
-	err = sub.stream.Send(&pb.Response{
+	if err = sub.stream.Send(&pb.Response{
 		ResourceData:    fmt.Sprintf("data mock for: %d", id),
 		Resource:        resource,
 		AnyResourceData: resourceData,
-	})
+	}); err != nil {
+		log.Printf("Failed to send memory information to client: %v", err)
+		select {
+		case sub.finished <- true:
+			log.Printf("Unsubscribed client: %d", id)
+		default:
+			// Default case is to avoid blocking in case client has already unsubscribed
+		}
+		// In case of error the client would re-subscribe so close the subscriber stream
+		//unsubscribe = append(unsubscribe, id)
+	}
+
 	//fallthrough
 	return byteData, err
 }
@@ -280,11 +317,21 @@ func (server *ResourceMonitorServer) StoreInfoCollectAndSend(byteData []byte, su
 		TypeUrl: "anyResourceData_storage",
 		Value:   byteData,
 	}
-	err = sub.stream.Send(&pb.Response{
+	if err = sub.stream.Send(&pb.Response{
 		ResourceData:    fmt.Sprintf("data mock for: %d", id),
 		Resource:        resource,
 		AnyResourceData: resourceData,
-	})
+	}); err != nil {
+		log.Printf("Failed to send storage information to client: %v", err)
+		select {
+		case sub.finished <- true:
+			log.Printf("Unsubscribed client: %d", id)
+		default:
+			// Default case is to avoid blocking in case client has already unsubscribed
+		}
+		// In case of error the client would re-subscribe so close the subscriber stream
+		//unsubscribe = append(unsubscribe, id)
+	}
 	//log.Printf("Now NOT support resource service type: %v",
 	//	sub.sub_services) //.Xor(utils.NewBitMapFromString("11000000"))
 }

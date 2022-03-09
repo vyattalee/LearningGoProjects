@@ -222,6 +222,10 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 			sub_services.Set(int(pb.ServiceType_StorageService))
 		}
 	}
+
+	//exit := make(chan os.Signal, 1)
+	//signal.Notify(exit, syscall.SIGTERM, syscall.SIGINT)
+
 	//stream, err := c.RouteChat(context.Background())
 	stream, err := c.Subscribe(context.Background(),
 		&pb.Request{Id: 1, Filter: &pb.Filter{SubService: sub_services.Bytes()}})
