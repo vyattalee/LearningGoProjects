@@ -106,7 +106,7 @@ func (g *Server) GrpcServer() *grpc.Server {
 	return g.grpcSever
 }
 
-func (g *Server) Start() error {
+func (g *Server) Start(doJobs func()) error {
 	listener, err := net.Listen("tcp", g.opts.Address)
 	if err != nil {
 		return err
@@ -121,6 +121,7 @@ func (g *Server) Start() error {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
+		doJobs()
 		select {
 		case sig := <-ch:
 			log.Infof("Received signal %s", sig)

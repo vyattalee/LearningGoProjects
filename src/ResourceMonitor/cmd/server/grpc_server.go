@@ -194,9 +194,9 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 	log.Printf("Start GRPC server based on service name ")
 
 	// Start sending data to subscribers
-	go resourceMonitorServer.DoJobs()
+	//go resourceMonitorServer.DoJobs()
 
-	return rpcServer.Start()
+	return rpcServer.Start(resourceMonitorServer.DoJobs)
 }
 
 func seedUsers(userStore service.UserStore) error {

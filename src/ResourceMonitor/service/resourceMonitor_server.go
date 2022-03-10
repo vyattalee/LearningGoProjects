@@ -26,7 +26,7 @@ type ResourceMonitorServer struct {
 // NewProcessorsServer returns a new ProcessorsServer
 func NewResourceMonitorServer() *ResourceMonitorServer {
 	// Save the subscriber stream according to the given client ID
-	return &ResourceMonitorServer{ticker: time.NewTicker(5 * time.Second)}
+	return &ResourceMonitorServer{ticker: time.NewTicker(time.Second)}
 }
 
 type sub struct {
@@ -54,6 +54,7 @@ func (server *ResourceMonitorServer) Subscribe(
 	ctx := stream.Context()
 	// Keep this scope alive because once this scope exits - the stream is closed
 	for {
+		time.Sleep(2 * time.Second)
 		select {
 		case <-fin:
 			log.Printf("Closing stream for client ID: %d", req.Id)
@@ -113,27 +114,42 @@ func (server *ResourceMonitorServer) StartService() {
 
 func (server *ResourceMonitorServer) DoJobs() {
 	log.Println("Starting resource monitor background service")
-	for {
-		time.Sleep(time.Second)
+	c1, cancel := context.WithCancel(context.Background())
+	//c := make(chan os.Signal)
+	//signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	//go func(ctx context.Context) {
+	//	<-c
+	//	return
+	//}(c1)
 
-		quit := make(chan struct{})
-		ch := make(chan os.Signal, 1)
-		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	go func(ctx context.Context) {
+		for {
+			//time.Sleep(time.Second)
 
-		select {
-		default:
-			// do stuff
+			quit := make(chan struct{})
+			ch := make(chan os.Signal, 1)
+			signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 
-			server.doTickerJobs(quit)
-		case sig := <-ch:
-			log.Println("Received signal in DoJobs task %s", sig)
-		case <-quit:
-			server.ticker.Stop()
-			break
+			select {
+
+			case <-server.ticker.C:
+
+				server.doTickerJobs(quit)
+
+			case sig := <-ch:
+				log.Println("Received signal in DoJobs task %s", sig)
+				cancel()
+				return
+
+			case <-quit:
+				server.ticker.Stop()
+				break
+
+			}
 
 		}
 
-	}
+	}(c1)
 }
 
 func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
