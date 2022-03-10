@@ -15,12 +15,12 @@ import (
 type ResourceMonitorClient struct {
 	service      pb.ResourceMonitorServiceClient
 	conn         *grpc.ClientConn // conn is the client gRPC connection
-	id           int32            // id is the client ID used for subscribing
+	id           uint32           // id is the client ID used for subscribing
 	sub_services *utils.BitMap
 }
 
 // NewResourceMonitorClient returns a new processors client
-func NewResourceMonitorClient(id int32, cc *grpc.ClientConn) *ResourceMonitorClient {
+func NewResourceMonitorClient(id uint32, cc *grpc.ClientConn) *ResourceMonitorClient {
 	service := pb.NewResourceMonitorServiceClient(cc)
 	return &ResourceMonitorClient{service: service, id: id, sub_services: utils.NewBitMap(8)}
 }
@@ -133,7 +133,7 @@ func mkConnection(target string, opts ...grpc.DialOption) (*grpc.ClientConn, err
 }
 
 // MKResourceMonitorClient creates a new client instance
-func MKResourceMonitorClient(id int32, target string, opts ...grpc.DialOption) (*ResourceMonitorClient, error) {
+func MKResourceMonitorClient(id uint32, target string, opts ...grpc.DialOption) (*ResourceMonitorClient, error) {
 	conn, err := mkConnection(target, opts...)
 	if err != nil {
 		return nil, err
@@ -162,7 +162,7 @@ func authMethods() map[string]bool {
 }
 
 // MKResourceMonitorClient creates a new client instance
-func MKResourceMonitorInterceptorClient(id int32, target string, opts ...grpc.DialOption) (*ResourceMonitorClient, error) {
+func MKResourceMonitorInterceptorClient(id uint32, target string, opts ...grpc.DialOption) (*ResourceMonitorClient, error) {
 	//establish the first connection
 	conn, err := mkConnection(target, opts...)
 	if err != nil {

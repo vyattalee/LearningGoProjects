@@ -9,7 +9,10 @@ import (
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/shirou/gopsutil/mem"
 	"log"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -111,17 +114,19 @@ func (server *ResourceMonitorServer) StartService() {
 func (server *ResourceMonitorServer) DoJobs() {
 	log.Println("Starting resource monitor background service")
 	for {
-		//time.Sleep(time.Second)
+		time.Sleep(time.Second)
 
 		quit := make(chan struct{})
-		//waitResponse := make(chan error)
+		ch := make(chan os.Signal, 1)
+		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 
 		select {
 		default:
 			// do stuff
 
 			server.doTickerJobs(quit)
-
+		case sig := <-ch:
+			log.Println("Received signal in DoJobs task %s", sig)
 		case <-quit:
 			server.ticker.Stop()
 			break
@@ -134,14 +139,14 @@ func (server *ResourceMonitorServer) DoJobs() {
 func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 
 	// A list of clients to unsubscribe in case of error
-	var unsubscribe []int32
+	var unsubscribe []uint32
 	//subsciber length, if subscriber_len is zero, quit chan<- struct{}{} to stop time.Ticker
 	//var subscriber_len int = 0
 
 	// Iterate over all subscribers and send data to each client
 	server.subscribers.Range(func(k, v interface{}) bool {
 
-		id, ok := k.(int32)
+		id, ok := k.(uint32)
 		if !ok {
 			log.Printf("Failed to cast subscriber key: %T", k)
 			return false
@@ -161,9 +166,14 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 		log.Println("$$$$$$$$$$$$$client:", id, "	subscribe services:", sub.sub_services.String())
 
 		ctx := sub.stream.Context()
+		//ch := make(chan os.Signal, 1)
+		//signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 		// Keep this scope alive because once this scope exits - the stream is closed
 		select {
 
+		//case sig := <-ch:
+		//	log.Println("Received signal %s", sig)
+		//fallthrough
 		case <-ctx.Done():
 			sub.finished <- true
 			log.Printf("Client ID %d has disconnected", id)
@@ -226,7 +236,7 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 
 }
 
-func (server *ResourceMonitorServer) ProcessorInfoCollectAndSend(cpu []*pb.CPU, err error, byteData []byte, sub sub, id int32) (error, []byte, bool, bool) {
+func (server *ResourceMonitorServer) ProcessorInfoCollectAndSend(cpu []*pb.CPU, err error, byteData []byte, sub sub, id uint32) (error, []byte, bool, bool) {
 	cpu, err = CollectCPUGPUResource()
 	if err != nil {
 
@@ -262,7 +272,7 @@ func (server *ResourceMonitorServer) ProcessorInfoCollectAndSend(cpu []*pb.CPU, 
 	return err, byteData, false, false
 }
 
-func (server *ResourceMonitorServer) MemoryInfoCollectAndSend(byteData []byte, err error, sub sub, id int32) ([]byte, error) {
+func (server *ResourceMonitorServer) MemoryInfoCollectAndSend(byteData []byte, err error, sub sub, id uint32) ([]byte, error) {
 	info, _ := mem.VirtualMemory()
 	val, unit := ConvertMemory(info.Total)
 	resource := &pb.Response_Memory{
@@ -297,7 +307,7 @@ func (server *ResourceMonitorServer) MemoryInfoCollectAndSend(byteData []byte, e
 	return byteData, err
 }
 
-func (server *ResourceMonitorServer) StoreInfoCollectAndSend(byteData []byte, sub sub, id int32) {
+func (server *ResourceMonitorServer) StoreInfoCollectAndSend(byteData []byte, sub sub, id uint32) {
 	storage, err := GetStorageInfo()
 
 	resource := &pb.Response_Storage{

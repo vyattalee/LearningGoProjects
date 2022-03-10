@@ -94,11 +94,11 @@ func (s *longlivedServer) mockDataGenerator() {
 		time.Sleep(time.Second)
 
 		// A list of clients to unsubscribe in case of error
-		var unsubscribe []int32
+		var unsubscribe []uint32
 
 		// Iterate over all subscribers and send data to each client
 		s.subscribers.Range(func(k, v interface{}) bool {
-			id, ok := k.(int32)
+			id, ok := k.(uint32)
 			if !ok {
 				log.Printf("Failed to cast subscriber key: %T", k)
 				return false

@@ -16,6 +16,7 @@ import (
 	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector"
 	"github.com/LearningGoProjects/ResourceMonitor/rpc/client/selector/registry"
 	"github.com/LearningGoProjects/ResourceMonitor/utils"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -105,7 +106,7 @@ func SubscribeToServerDirectly() {
 
 	for i := 1; i <= 5; i++ {
 		wg.Add(1)
-		clientX, err := client.MKResourceMonitorInterceptorClient(int32(i), serverAddress, transportOption)
+		clientX, err := client.MKResourceMonitorInterceptorClient(uint32(i), serverAddress, transportOption)
 		//clientX, err := clientX.MKResourceMonitorClient(int32(i), *serverAddress, transportOption)
 		if err != nil {
 			log.Fatal(err)
@@ -228,7 +229,7 @@ func SubscribeToServerByServcieDiscovery(enableTLS bool) {
 
 	//stream, err := c.RouteChat(context.Background())
 	stream, err := c.Subscribe(context.Background(),
-		&pb.Request{Id: 1, Filter: &pb.Filter{SubService: sub_services.Bytes()}})
+		&pb.Request{Id: uuid.New().ID(), Filter: &pb.Filter{SubService: sub_services.Bytes()}})
 	if err != nil {
 		panic(err)
 	}
