@@ -195,12 +195,12 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	exitCh := make(chan struct{})
+	//exitCh := make(chan struct{})
 
 	// Start sending data to subscribers
-	resourceMonitorServer.DoJobs(exitCh, ctx)
+	resourceMonitorServer.DoJobs(ctx)
 
-	return rpcServer.Start(exitCh, cancel)
+	return rpcServer.Start(resourceMonitorServer.ExitCh, cancel)
 }
 
 func seedUsers(userStore service.UserStore) error {

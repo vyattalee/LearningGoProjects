@@ -9,7 +9,6 @@ import (
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/shirou/gopsutil/mem"
 	"log"
-	"os"
 	"sync"
 	"time"
 )
@@ -19,12 +18,13 @@ type ResourceMonitorServer struct {
 	pb.UnimplementedResourceMonitorServiceServer
 	subscribers sync.Map // subscribers is a concurrent map that holds mapping from a client ID to it's subscriber
 	ticker      *time.Ticker
+	ExitCh      chan struct{}
 }
 
 // NewProcessorsServer returns a new ProcessorsServer
 func NewResourceMonitorServer() *ResourceMonitorServer {
 	// Save the subscriber stream according to the given client ID
-	return &ResourceMonitorServer{ticker: time.NewTicker(time.Second)}
+	return &ResourceMonitorServer{ticker: time.NewTicker(time.Second), ExitCh: make(chan struct{})}
 }
 
 type sub struct {
@@ -51,18 +51,28 @@ func (server *ResourceMonitorServer) Subscribe(
 
 	ctx := stream.Context()
 	// Keep this scope alive because once this scope exits - the stream is closed
+	//go func() {
 	for {
 		time.Sleep(2 * time.Second)
 		select {
 		case <-fin:
-			log.Printf("Closing stream for client ID: %d", req.Id)
-			return nil
+			log.Printf("Closing stream for client ID: %d in Subscribe", req.Id)
+			server.ExitCh <- struct{}{}
+			//return nil
 		case <-ctx.Done():
 			fin <- true
-			log.Printf("Client ID %d has disconnected", req.Id)
-			return nil
+			server.ExitCh <- struct{}{}
+			log.Printf("Client ID %d has disconnected in Subscribe", req.Id)
+			//return nil
+			//case <-server.ExitCh:
+			//	log.Printf("Server Exiting Now")
+			//	os.Exit(1)
+			//default:
 		}
 	}
+	//}()
+
+	return nil
 
 }
 
@@ -110,7 +120,7 @@ func (server *ResourceMonitorServer) StartService() {
 	}
 }
 
-func (server *ResourceMonitorServer) DoJobs(exitCh chan struct{}, c1 context.Context) {
+func (server *ResourceMonitorServer) DoJobs(c1 context.Context) {
 	log.Println("Starting resource monitor background service")
 
 	go func(ctx context.Context) {
@@ -118,18 +128,18 @@ func (server *ResourceMonitorServer) DoJobs(exitCh chan struct{}, c1 context.Con
 			// Do something useful in a real usecase.
 			// Here we just sleep for this example.
 			time.Sleep(time.Second)
-			//quit := make(chan struct{})
-			server.doTickerJobs(exitCh)
+			quit := make(chan struct{})
 
 			select {
 			case <-ctx.Done():
-				fmt.Println("received done, exiting in 500 milliseconds")
+				fmt.Println("received done signal, exiting while all clients disconnected")
 				//time.Sleep(500 * time.Millisecond)
-				exitCh <- struct{}{}
-				os.Exit(1)
+				server.ExitCh <- struct{}{}
+				//os.Exit(1)
 				return
 			default:
 			}
+			server.doTickerJobs(quit)
 		}
 	}(c1)
 
@@ -174,6 +184,7 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 			//quit <- struct{}{}
 			unsubscribe = append(unsubscribe, id)
 			log.Printf("Client ID %d has disconnected", id)
+
 			//return false
 		default:
 

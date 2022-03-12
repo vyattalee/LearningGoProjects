@@ -156,11 +156,14 @@ func (g *Server) Start(exitCh chan struct{}, cancel context.CancelFunc) error {
 }
 
 func (g *Server) Stop() error {
+	log.Infof("grpcServer graceful stop")
 	select {
 	case <-g.exit:
+		log.Infof("grpcServer graceful stop case <-g.exit:")
 		return nil
 	default:
 		close(g.exit)
+		log.Infof("grpcServer graceful stop default")
 		g.grpcSever.GracefulStop()
 		return nil
 	}
