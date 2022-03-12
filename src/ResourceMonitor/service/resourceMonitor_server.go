@@ -112,9 +112,7 @@ func (server *ResourceMonitorServer) StartService() {
 
 func (server *ResourceMonitorServer) DoJobs(exitCh chan struct{}, c1 context.Context) {
 	log.Println("Starting resource monitor background service")
-	//c1, cancel := context.WithCancel(context.Background())
-	//
-	//exitCh := make(chan struct{})
+
 	go func(ctx context.Context) {
 		for {
 			// Do something useful in a real usecase.
@@ -135,45 +133,6 @@ func (server *ResourceMonitorServer) DoJobs(exitCh chan struct{}, c1 context.Con
 		}
 	}(c1)
 
-	//signalCh := make(chan os.Signal, 1)
-	//signal.Notify(signalCh, os.Interrupt)
-	//go func() {
-	//	select {
-	//	case <-signalCh:
-	//		cancel()
-	//		return
-	//	}
-	//}()
-	//<-exitCh
-
-	//go func(ctx context.Context) {
-	//	for {
-	//		//time.Sleep(time.Second)
-	//
-	//		quit := make(chan struct{})
-	//		ch := make(chan os.Signal, 1)
-	//		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
-	//
-	//		select {
-	//
-	//		case <-server.ticker.C:
-	//
-	//			server.doTickerJobs(quit)
-	//
-	//		case sig := <-ch:
-	//			log.Println("Received signal in DoJobs task %s", sig)
-	//			cancel()
-	//			return
-	//
-	//		case <-quit:
-	//			server.ticker.Stop()
-	//			break
-	//
-	//		}
-	//
-	//	}
-	//
-	//}(c1)
 }
 
 func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
@@ -206,14 +165,10 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 		log.Println("$$$$$$$$$$$$$client:", id, "	subscribe services:", sub.sub_services.String())
 
 		ctx := sub.stream.Context()
-		//ch := make(chan os.Signal, 1)
-		//signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+
 		// Keep this scope alive because once this scope exits - the stream is closed
 		select {
 
-		//case sig := <-ch:
-		//	log.Println("Received signal %s", sig)
-		//fallthrough
 		case <-ctx.Done():
 			//sub.finished <- true
 			//quit <- struct{}{}
@@ -222,8 +177,6 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 			//return false
 		default:
 
-			//switch {
-			//case sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet:
 			if sub.sub_services.Bit(int(pb.ServiceType_ProcessorService)) == utils.IsSet {
 
 				log.Println("sub.sub_services.Bit(int(pb.ServiceType_ProcessorService))")
@@ -244,28 +197,6 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 
 				server.StoreInfoCollectAndSend(byteData, sub, id)
 			}
-
-			//}  //end of switch
-
-			//whether Can it be integrated into the following single function
-			//if err = sub.stream.Send(&pb.Response{
-			//	ResourceData: fmt.Sprintf("data mock for: %d", id),
-			//	Resource: func()*pb.{
-			//		return "anonymous stringy\n"
-			//	};},
-			//}); err != nil {
-			//if err != nil {
-			//	//if err := sub.stream.Send(&pb.Response{ResourceData: anydata}); err != nil {
-			//	log.Printf("Failed to send data to client: %v", err)
-			//	select {
-			//	case sub.finished <- true:
-			//		log.Printf("Unsubscribed client: %d", id)
-			//	default:
-			//		// Default case is to avoid blocking in case client has already unsubscribed
-			//	}
-			//	// In case of error the client would re-subscribe so close the subscriber stream
-			//	unsubscribe = append(unsubscribe, id)
-			//}
 		}
 		return true
 
