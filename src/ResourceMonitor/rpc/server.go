@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"github.com/LearningGoProjects/ResourceMonitor/log"
 	"github.com/LearningGoProjects/ResourceMonitor/registry"
 	"github.com/LearningGoProjects/ResourceMonitor/rpc/metrics"
@@ -106,7 +107,7 @@ func (g *Server) GrpcServer() *grpc.Server {
 	return g.grpcSever
 }
 
-func (g *Server) Start(doJobs func()) error {
+func (g *Server) Start(exitCh chan struct{}, cancel context.CancelFunc) error {
 	listener, err := net.Listen("tcp", g.opts.Address)
 	if err != nil {
 		return err
@@ -118,16 +119,18 @@ func (g *Server) Start(doJobs func()) error {
 		return err
 	}
 
-	ch := make(chan os.Signal, 1)
+	ch := make(chan os.Signal) //, 1
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
-		doJobs()
+
 		select {
 		case sig := <-ch:
 			log.Infof("Received signal %s", sig)
+
 			if err = g.Stop(); err != nil {
 				log.Error("Server stop error :%v", err)
 			}
+			cancel()
 		case <-g.exit:
 		}
 
@@ -137,16 +140,19 @@ func (g *Server) Start(doJobs func()) error {
 	}()
 
 	// metrics
-	if len(g.opts.Metadata[metaDataMetricsAddressKey]) > 0 {
-		go func() {
-			if err := metrics.Run(g.opts.MetricsPath, g.opts.Metadata[metaDataMetricsAddressKey]); err != nil {
-				log.Fatalf("Run metrics server error: %v", err)
-			}
-		}()
-	}
+	//if len(g.opts.Metadata[metaDataMetricsAddressKey]) > 0 {
+	//	go func() {
+	//		if err := metrics.Run(g.opts.MetricsPath, g.opts.Metadata[metaDataMetricsAddressKey]); err != nil {
+	//			log.Fatalf("Run metrics server error: %v", err)
+	//		}
+	//	}()
+	//}
 
 	log.Infof("RPC server listen on %s", g.opts.Address)
-	return g.grpcSever.Serve(listener)
+	err = g.grpcSever.Serve(listener)
+	<-exitCh
+
+	return err
 }
 
 func (g *Server) Stop() error {

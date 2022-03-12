@@ -10,9 +10,7 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"log"
 	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -112,44 +110,70 @@ func (server *ResourceMonitorServer) StartService() {
 	}
 }
 
-func (server *ResourceMonitorServer) DoJobs() {
+func (server *ResourceMonitorServer) DoJobs(exitCh chan struct{}, c1 context.Context) {
 	log.Println("Starting resource monitor background service")
-	c1, cancel := context.WithCancel(context.Background())
-	//c := make(chan os.Signal)
-	//signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	//go func(ctx context.Context) {
-	//	<-c
-	//	return
-	//}(c1)
-
+	//c1, cancel := context.WithCancel(context.Background())
+	//
+	//exitCh := make(chan struct{})
 	go func(ctx context.Context) {
 		for {
-			//time.Sleep(time.Second)
-
-			quit := make(chan struct{})
-			ch := make(chan os.Signal, 1)
-			signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+			// Do something useful in a real usecase.
+			// Here we just sleep for this example.
+			time.Sleep(time.Second)
+			//quit := make(chan struct{})
+			server.doTickerJobs(exitCh)
 
 			select {
-
-			case <-server.ticker.C:
-
-				server.doTickerJobs(quit)
-
-			case sig := <-ch:
-				log.Println("Received signal in DoJobs task %s", sig)
-				cancel()
+			case <-ctx.Done():
+				fmt.Println("received done, exiting in 500 milliseconds")
+				//time.Sleep(500 * time.Millisecond)
+				exitCh <- struct{}{}
+				os.Exit(1)
 				return
-
-			case <-quit:
-				server.ticker.Stop()
-				break
-
+			default:
 			}
-
 		}
-
 	}(c1)
+
+	//signalCh := make(chan os.Signal, 1)
+	//signal.Notify(signalCh, os.Interrupt)
+	//go func() {
+	//	select {
+	//	case <-signalCh:
+	//		cancel()
+	//		return
+	//	}
+	//}()
+	//<-exitCh
+
+	//go func(ctx context.Context) {
+	//	for {
+	//		//time.Sleep(time.Second)
+	//
+	//		quit := make(chan struct{})
+	//		ch := make(chan os.Signal, 1)
+	//		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT)
+	//
+	//		select {
+	//
+	//		case <-server.ticker.C:
+	//
+	//			server.doTickerJobs(quit)
+	//
+	//		case sig := <-ch:
+	//			log.Println("Received signal in DoJobs task %s", sig)
+	//			cancel()
+	//			return
+	//
+	//		case <-quit:
+	//			server.ticker.Stop()
+	//			break
+	//
+	//		}
+	//
+	//	}
+	//
+	//}(c1)
 }
 
 func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
@@ -191,9 +215,11 @@ func (server *ResourceMonitorServer) doTickerJobs(quit chan struct{}) {
 		//	log.Println("Received signal %s", sig)
 		//fallthrough
 		case <-ctx.Done():
-			sub.finished <- true
+			//sub.finished <- true
+			//quit <- struct{}{}
+			unsubscribe = append(unsubscribe, id)
 			log.Printf("Client ID %d has disconnected", id)
-			return false
+			//return false
 		default:
 
 			//switch {
