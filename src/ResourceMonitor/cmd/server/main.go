@@ -60,7 +60,7 @@ func ServiceProviderBySubscribeDirectly() {
 	processors_server := service.NewProcessorsServer()
 	memory_server := service.NewMemoryServer()
 
-	//
+	//listener listen
 	listener, err := net.Listen("tcp", serverAddress)
 	if err != nil {
 		log.Fatal("cannot start server: ", err)
