@@ -28,7 +28,7 @@ jobs:
           go get github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
     
     - name: entering the working directory
-      run: cd ./src/ResourceMonitor/ 
+      run: cd ./src/ResourceMonitor/ && mkdir -p pb
 
       
     - name: Generating protos
