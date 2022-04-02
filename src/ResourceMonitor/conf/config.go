@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"os"
+	"strconv"
 )
 
 // 常量
@@ -36,7 +37,7 @@ type Server struct {
 
 func (config *Config) GetServerAddress() string {
 
-	return (config.server.address) + ":" + string(config.server.port)
+	return (config.server.address) + ":" + strconv.Itoa(int(config.server.port)) //string(config.server.port)
 	//return config.server
 }
 
