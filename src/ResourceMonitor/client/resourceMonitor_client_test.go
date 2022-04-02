@@ -41,7 +41,7 @@ func TestResourceMonitorClient_Start(t *testing.T) {
 	serverAddress, resouceMonitorServer := startTestResourceMonitorServer(t, userStore)
 	transportOption := grpc.WithInsecure()
 
-	var ExpectedId int32 = 1
+	var ExpectedId uint32 = 1
 
 	clientX, err := client.MKResourceMonitorInterceptorClient(ExpectedId, serverAddress, transportOption)
 	if err != nil {
