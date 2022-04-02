@@ -1,3 +1,6 @@
+//go:build etcd_supported
+// +build etcd_supported
+
 package etcd
 
 import (

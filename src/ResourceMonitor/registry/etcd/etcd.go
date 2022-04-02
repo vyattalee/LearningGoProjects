@@ -1,4 +1,7 @@
-// Package etcd provides an etcd service registry
+//go:build etcd_supported
+// +build etcd_supported
+
+//Package etcd provides an etcd service registry
 package etcd
 
 import (
