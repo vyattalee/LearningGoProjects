@@ -31,7 +31,7 @@ jobs:
       
     - name: Generating protos
       run: |
-          make clean && make proto
+          cd ./src/ResourceMonitor/ && clean && make proto
 
     - name: Build    
       run: go mod download && go build -v ./...
