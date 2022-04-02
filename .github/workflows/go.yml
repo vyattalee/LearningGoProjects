@@ -41,6 +41,8 @@ jobs:
     - name: Build Client    
       run: cd ./src/ResourceMonitor/ && go build -v ./cmd/client/*.go
 
+    - name: Build Misc Items    
+      run: cd ./src/ResourceMonitor/ && go build -v ./...
 
     - name: Test
       run: cd ./src/ResourceMonitor/ && go test -v ./...
