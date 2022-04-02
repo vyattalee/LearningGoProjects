@@ -140,13 +140,13 @@ func (g *Server) Start(exitCh chan struct{}, cancel context.CancelFunc) error {
 	}()
 
 	// metrics
-	//if len(g.opts.Metadata[metaDataMetricsAddressKey]) > 0 {
-	//	go func() {
-	//		if err := metrics.Run(g.opts.MetricsPath, g.opts.Metadata[metaDataMetricsAddressKey]); err != nil {
-	//			log.Fatalf("Run metrics server error: %v", err)
-	//		}
-	//	}()
-	//}
+	if len(g.opts.Metadata[metaDataMetricsAddressKey]) > 0 {
+		go func() {
+			if err := metrics.Run(g.opts.MetricsPath, g.opts.Metadata[metaDataMetricsAddressKey]); err != nil {
+				log.Fatalf("Run metrics server error: %v", err)
+			}
+		}()
+	}
 
 	log.Infof("RPC server listen on %s", g.opts.Address)
 	err = g.grpcSever.Serve(listener)

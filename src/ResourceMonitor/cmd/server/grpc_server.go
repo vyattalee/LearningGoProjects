@@ -154,12 +154,12 @@ func runRemodeledGRPCServer(enableTLS bool) error {
 
 	rpcServer := NewRPCServer(rg,
 		rpc.Name("ResourceMonitor"),
-		rpc.Version("v1.0.0"),
+		rpc.Version("v1.0.1"),
 		rpc.Metadata(map[string]string{
 			"server":           "rpc",
-			"resource_monitor": "1",
+			"resource_monitor": "2",
 		}),
-		rpc.MetricsAddress(":9091"),
+		rpc.MetricsAddress(":9096"),
 		rpc.UnaryServerInterceptor(
 			interceptorFun,
 			ratelimit.UnaryServerInterceptor(tokenbucket.New(10, 10)),
