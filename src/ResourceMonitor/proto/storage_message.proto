@@ -2,7 +2,7 @@ syntax="proto3";
 
 package LearningGoProjects.ResourceMonitor;
 
-option go_package = ".;pb";
+option go_package = "./;pb";
 
 message Storage {
   repeated PartitionStat partition  = 1;

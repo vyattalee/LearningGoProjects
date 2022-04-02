@@ -5,7 +5,7 @@ package LearningGoProjects.ResourceMonitor;
 
 //import "google/api/annotations.proto";
 
-option go_package = ".;pb";
+option go_package = "./;pb";
 
 
 message LoginRequest {
