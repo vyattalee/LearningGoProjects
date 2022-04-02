@@ -2,7 +2,7 @@ module github.com/LearningGoProjects/ResourceMonitor
 
 go 1.16
 
-//replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
+replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
 
 require (
 	github.com/Allenxuxu/ratelimit v0.0.0-20210131080358-1c878c80259b
