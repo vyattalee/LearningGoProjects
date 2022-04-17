@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">foobar</string>
-    <string name="reverse">Reverse</string>
-    <string name="text_to_reverse">Text to reverse</string>
-</resources>
