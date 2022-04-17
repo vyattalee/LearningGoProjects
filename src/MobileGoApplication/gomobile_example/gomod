@@ -1,0 +1,9 @@
+module github.com/LearningGoProjects/MobileGoApplication/gomobile_example
+
+go 1.16
+
+require (
+	golang.org/x/mobile latest
+)
+
+
